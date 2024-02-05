@@ -10,7 +10,7 @@ function Vote() {
 
     const [searchText, setSearchText] = React.useState("");
 
-    // const relay = await Relay.connect('wss://relay.example.com')
+    // const relay = await Relay.connect('wss://relay.example.com' )
     useEffect(() => {
         SearchEvent();
     }, []);
