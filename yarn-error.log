@@ -1,0 +1,71 @@
+Arguments: 
+  /Users/lance/.nvm/versions/node/v21.5.0/bin/node /usr/local/bin/yarn add nostr-tools
+
+PATH: 
+  /Users/lance/.nvm/versions/node/v21.5.0/bin:/usr/local/opt/llvm/bin:/Users/lance/solana-release/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/go/bin:/Library/Apple/usr/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/Users/lance/.cargo/bin:/Library/Java/JavaVirtualMachines/jdk1.8.0_321.jdk/Contents/Home/bin:/Users/lance/myProject/nft-kit/chromedriver:/usr/local/Cellar/maven/3.8.5/bin:/usr/local/mysql/bin:/usr/local/mysql/support-files:~/.pyenv/bin:/Users/lance/.local/bin
+
+Yarn version: 
+  1.22.10
+
+Node version: 
+  21.5.0
+
+Platform: 
+  darwin x64
+
+Trace: 
+  Error: certificate has expired
+      at TLSSocket.onConnectSecure (node:_tls_wrap:1674:34)
+      at TLSSocket.emit (node:events:519:28)
+      at TLSSocket._finishInit (node:_tls_wrap:1085:8)
+      at ssl.onhandshakedone (node:_tls_wrap:871:12)
+
+npm manifest: 
+  {
+    "name": "zsocial-app",
+    "version": "0.1.0",
+    "private": true,
+    "dependencies": {
+      "@fortawesome/free-solid-svg-icons": "^6.5.1",
+      "@fortawesome/react-fontawesome": "^0.2.0",
+      "@testing-library/jest-dom": "^5.17.0",
+      "@testing-library/react": "^13.4.0",
+      "@testing-library/user-event": "^13.5.0",
+      "react": "^18.2.0",
+      "react-dom": "^18.2.0",
+      "react-router-dom": "^6.21.3",
+      "react-scripts": "5.0.1",
+      "typescript": "^5.3.3",
+      "web-vitals": "^2.1.4"
+    },
+    "scripts": {
+      "start": "react-scripts start",
+      "build": "react-scripts build",
+      "test": "react-scripts test",
+      "eject": "react-scripts eject"
+    },
+    "eslintConfig": {
+      "extends": [
+        "react-app",
+        "react-app/jest"
+      ]
+    },
+    "browserslist": {
+      "production": [
+        ">0.2%",
+        "not dead",
+        "not op_mini all"
+      ],
+      "development": [
+        "last 1 chrome version",
+        "last 1 firefox version",
+        "last 1 safari version"
+      ]
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
