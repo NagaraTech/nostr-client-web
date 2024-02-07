@@ -20,6 +20,7 @@
 
   },
   "scripts": {
+    "install": "npm install --force --legacy-peer-deps",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
