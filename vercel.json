@@ -1,6 +1,6 @@
 {
     "scripts": {
-      "install": "npm run install",
+      "install": "npm install --force --legacy-peer-deps",
       "build": "npm run build" 
     }
   }
