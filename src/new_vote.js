@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMinus } from '@fortawesome/free-solid-svg-icons';
+// import { FontAwesomeIcon } from './logo.png';
+// import { faMinus } from './logo.png';
 import { Relay, generateSecretKey, getPublicKey } from 'nostr-tools'
-import { finalizeEvent, verifyEvent } from 'nostr-tools'
+import { finalizeEvent } from 'nostr-tools'
 
 function NewVote() {
 
@@ -82,7 +82,7 @@ function NewVote() {
 
 
     async function connectAndSubscribe(jsonData) {
-        const relay = await Relay.connect('ws://127.0.0.1:8080/');
+        const relay = await Relay.connect('ws://47.129.0.53:8080');
         console.log(`Connected to ${relay.url}`);
 
         // let's publish a new event while simultaneously monitoring the relay for it
@@ -101,9 +101,9 @@ function NewVote() {
         // this assigns the pubkey, calculates the event id and signs the event in a single step
         const signedEvent = finalizeEvent(eventTemplate, sk)
 
-        console.log("signedEvent",signedEvent)
+        console.log("signedEvent", String(signedEvent.created_at))
         await relay.publish(signedEvent)
-
+        console.log("write result")
         relay.close()
 
 
@@ -251,7 +251,7 @@ function NewVote() {
                                             className="absolute top-0 right-0 cursor-pointer text-red-500"
                                             onClick={() => handleRemoveOption(index)}
                                         >
-                                            <FontAwesomeIcon icon={faMinus} />
+                                            <image src='./logo.png' />
                                         </span>
                                     </div>
                                 ))}
@@ -269,7 +269,7 @@ function NewVote() {
                             <button onClick={handlePublish} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
 
 
-                                <Link to="/detail"> publish </Link>
+                                {/* <Link to="/detail"> publish </Link> */}
                             </button>
                         </div>
                     </div>
