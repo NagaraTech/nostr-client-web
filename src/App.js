@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Vote from './vote';
 import Detial from './detail';
 import NewVote from './new_vote';
+import Login from './login';
 
 
 import React, { useEffect } from 'react';
@@ -22,7 +23,7 @@ function App() {
 
   async function connectAndSubscribe() {
     try {
-      const relay = await Relay.connect('ws://127.0.0.1:8080/');
+      const relay = await Relay.connect('ws://47.129.0.53:8080');
       console.log(`Connected to ${relay.url}`);
 
 
@@ -83,7 +84,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Vote />} />
-        <Route path="/detail" element={<Detial />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/detail/:param" element={<Detial />} />
         <Route path="/newvote" element={<NewVote />} />
 
       </Routes>

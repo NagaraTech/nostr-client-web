@@ -9,40 +9,60 @@ import Login from './login';
 function Vote() {
 
     const [searchText, setSearchText] = React.useState("");
+    const [InitSearchData, setInitSearchData] = useState([]);
+    const [searchData, setSearchData] = useState([]);
 
-    // const relay = await Relay.connect('wss://relay.example.com' )
+
+
+    // const relay = await Relay.connect('wss://relay.example.com')
     useEffect(() => {
-        SearchEvent();
+        InitEvent();
     }, []);
 
-    async function SearchEvent(searchText) {
-        try {
-            const relay = await Relay.connect('ws://127.0.0.1:8080/');
-            console.log(`Connected to ${relay.url}`);
+    async function InitEvent() {
+        const socket = new WebSocket('ws://47.129.0.53:8080');
+        // RelayServer.send('["QUERY_SID"]'); 
+        socket.onopen = () => {
+            const message = JSON.stringify(["QUERY_SID"]);
+            socket.send(message);
+        };
+
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            setInitSearchData(data);
+            console.log('Received data:', data);
+            // 在这里处理接收到的数据
+        };
+
+        socket.onclose = () => {
+            console.log('Socket connection closed');
+            // 在这里处理连接关闭的逻辑
+        };
+    }
 
 
+    async function SearchEvent() {
+        const socket = new WebSocket('ws://47.129.0.53:8080');
+        console.log('searchText is',searchText);
+        // RelayServer.send('["QUERY_SID"]'); 
+        socket.onopen = () => {
+            const message = JSON.stringify(["QUERY", searchText]);
+            socket.send(message);
+        };
 
-            const sub = relay.subscribe(
-                [
-                    {
-                        ids: [searchText],
-                    },
-                ],
-                {
-                    onevent(event) {
-                        console.log('We got the event we wanted:', event);
-                    },
-                    oneose() {
-                        sub.close();
-                    },
-                }
-            );
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            setSearchData(data);
+            console.log('Received data:', data);
+            // 在这里处理接收到的数据
+        };
+
+        socket.onclose = () => {
+            console.log('Socket connection closed');
+            // 在这里处理连接关闭的逻辑
+        };
 
 
-
-        } catch (error) {
-            console.error('Error:', error);
-        }
     }
 
 
@@ -106,11 +126,13 @@ function Vote() {
 
 
                     <button
-                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-8"
-                           
-                        >
-                            Open Card
-                        </button>
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-8"
+
+                    >
+
+                        <Link to="/login"> Login</Link>
+
+                    </button>
 
 
 
@@ -121,17 +143,17 @@ function Vote() {
 
 
             <div class="mx-auto w-3/5">
-                
+
                 <div className="p-4">
                     <div className="bg-white p-4 rounded-md shadow-sm relative">
                         <h2 className="text-xl font-semibold mb-4">Search</h2>
-                        <p className="text-gray-600 mb-4">Paste a nostr ID (npub, nprofile, note, nevent or naddr), nostr address (tony@habla.news) or a URL with a nostr ID to see it in Habla.</p>
+                        <p className="text-gray-600 mb-4">Paste a nostr Event ID.</p>
                         <p className="text-gray-600 mb-4">Hashtags are supported, write a # in front of a term to filter by hashtags.</p>
                         <div className="flex items-center mb-4">
                             <i className="fas fa-search search-icon"></i>
                             <input
                                 type="text"
-                                placeholder="URL, nostr ID, nostr address or hashtag"
+                                placeholder="Event ID"
                                 className="border border-gray-300 p-2 rounded-md w-full search-input ml-2"
                                 value={searchText}
                                 onChange={(e) => setSearchText(e.target.value)}
@@ -144,7 +166,22 @@ function Vote() {
                             </button>
                         </div>
                         <div className="flex justify-center items-center h-40">
-                            <img src="https://lf3-static.bytednsdoc.com/obj/eden-cn/bqaeh7vhobd/feedback.svg" alt="Placeholder image representing no data available" className="opacity-50" />
+                            {searchData.length > 0 ? (
+                                <Link to={`/detail/${searchData[1]}`} className="bg-white p-4 rounded-md shadow-sm mb-4">
+                                <div className="flex justify-between items-center mb-2">
+                                  <span className="text-sm text-gray-500">{searchData[1]}</span>
+                                  <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">Active</span>
+                                </div>
+                                <h3 className="text-lg font-semibold">{searchData[2]}</h3>
+                                <p className="text-gray-600 text-sm mb-2 line-clamp-2">{searchData[3]}</p>
+                              </Link>
+                            ) : (
+                                <img
+                                    src="https://lf3-static.bytednsdoc.com/obj/eden-cn/bqaeh7vhobd/feedback.svg"
+                                    alt="Placeholder image representing no data available"
+                                    className="opacity-50"
+                                />
+                            )}
                         </div>
                     </div>
 
@@ -153,18 +190,32 @@ function Vote() {
                     <div className="mt-8">
                         <h2 className="text-2xl font-semibold mb-4">Proposals</h2>
 
+                        {InitSearchData.map((item) => (
+                            <Link to={`/detail/${item.id}`}>
+                                <div className="bg-white p-4 rounded-md shadow-sm mb-4" key={item.id}>
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="text-sm text-gray-500">{item.id}</span>
+                                    <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">Active</span>
+                                </div>
+                                <h3 className="text-lg font-semibold">{item.title}</h3>
+                                <p className="text-gray-600 text-sm mb-2 line-clamp-2">{item.info}</p>
+                            </div> 
+                            </Link>
+                           
+                        ))}
+
                         <Link to="/detail">
                             <div className="bg-white p-4 rounded-md shadow-sm mb-4">
                                 <div className="flex justify-between items-center mb-2">
-                                    <span className="text-sm text-gray-500">@limes.eth</span>
+                                    <span className="text-sm text-gray-500">id</span>
                                     <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">Active</span>
                                 </div>
-                                <h3 className="text-lg font-semibold">[Constitutional] Changes to the Constitution and the Security Council Election Process</h3>
+                                <h3 className="text-lg font-semibold">title</h3>
 
                                 <p
                                     className="text-gray-600 text-sm mb-2 line-clamp-2">
 
-                                    Abstract This Constitutional AIP proposes improvements to ional AIP propose ional AIP propose the ArbitrumDAO Constitution and the Security Council election process, which include  Abstract This Constitutional AIP proposes improvements to ...</p>
+                                    info</p>
 
                                 <span className="text-sm text-gray-500">Ends in 5 days</span>
                             </div>
