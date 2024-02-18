@@ -18,7 +18,7 @@ function App() {
 
   // const relay = await Relay.connect('wss://relay.example.com')
   useEffect(() => {
-    connectAndSubscribe();
+    // connectAndSubscribe();
   }, []);
 
   async function connectAndSubscribe() {
@@ -85,7 +85,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Vote />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/detail/:param" element={<Detial />} />
+        <Route path="/detail/:id" element={<Detial />} />
         <Route path="/newvote" element={<NewVote />} />
 
       </Routes>

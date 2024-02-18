@@ -5,6 +5,10 @@ import { Relay, generateSecretKey, getPublicKey } from 'nostr-tools'
 import { finalizeEvent, verifyEvent } from 'nostr-tools'
 
 import Login from './login';
+import { initializeApp } from "firebase/app";
+
+import { getDatabase, ref, push, set, onValue } from "firebase/database";
+
 
 function Vote() {
 
@@ -20,6 +24,46 @@ function Vote() {
     }, []);
 
     async function InitEvent() {
+
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCgRzMHIfhPZnIXedgNuqqoyQz5sausEu8",
+            authDomain: "vote-2b9d8.firebaseapp.com",
+            projectId: "vote-2b9d8",
+            storageBucket: "vote-2b9d8.appspot.com",
+            messagingSenderId: "1050103509183",
+            appId: "1:1050103509183:web:15565360fa1d58fe96560a",
+            measurementId: "G-NZXRF34DPT",
+            databaseURL: "https://vote-2b9d8-default-rtdb.asia-southeast1.firebasedatabase.app/"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        // Initialize Realtime Database and get a reference tco the service
+        const database = getDatabase(app);
+
+        const db = getDatabase();
+        const dataRef = ref(db, "vote");
+
+        onValue(dataRef, (snapshot) => {
+            const data = snapshot.val();
+            // Convert data to desired format
+            const convertedData = Object.keys(data).map((key) => {
+                const item = data[key];
+                return {
+                    id: key,
+                    title: item.tags[5],
+                    info: item.tags[6]
+                };
+            });
+
+            console.log(convertedData);
+            setInitSearchData(convertedData);
+            console.log("Data from Firebase:", data);
+        });
+
+
+
         const socket = new WebSocket('ws://47.129.0.53:8080');
         // RelayServer.send('["QUERY_SID"]'); 
         socket.onopen = () => {
@@ -29,7 +73,7 @@ function Vote() {
 
         socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            setInitSearchData(data);
+            // setInitSearchData(data);
             console.log('Received data:', data);
             // 在这里处理接收到的数据
         };
@@ -42,25 +86,57 @@ function Vote() {
 
 
     async function SearchEvent() {
-        const socket = new WebSocket('ws://47.129.0.53:8080');
-        console.log('searchText is',searchText);
-        // RelayServer.send('["QUERY_SID"]'); 
-        socket.onopen = () => {
-            const message = JSON.stringify(["QUERY", searchText]);
-            socket.send(message);
-        };
 
-        socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            setSearchData(data);
-            console.log('Received data:', data);
-            // 在这里处理接收到的数据
-        };
+        const db = getDatabase();
+        const dataRef = ref(db, "vote");
 
-        socket.onclose = () => {
-            console.log('Socket connection closed');
-            // 在这里处理连接关闭的逻辑
-        };
+        onValue(dataRef, (snapshot) => {
+            const data = snapshot.val();
+            // Convert data to desired format
+            const convertedData = Object.keys(data)
+                .filter(key => key === searchText)
+                .map(key => {
+                    const item = data[key];
+                    console.log("options", item.tags[7]);
+                    return {
+                        id: key,
+                        title: item.tags[5],
+                        info: item.tags[6],
+                        // startdate: item.tags[3],
+                        // enddate: item.tags[4],
+                        // multipleChoiceAllowed: item.tags[1],
+                        // options: item.tags[7]
+
+                    };
+                });
+
+            console.log('searchText is', searchText);
+            setSearchData(convertedData);
+            console.log('convertedData is', convertedData);
+
+
+        });
+
+
+        // const socket = new WebSocket('ws://47.129.0.53:8080');
+        // console.log('searchText is', searchText);
+        // // RelayServer.send('["QUERY_SID"]'); 
+        // socket.onopen = () => {
+        //     const message = JSON.stringify(["QUERY", searchText]);
+        //     socket.send(message);
+        // };
+
+        // socket.onmessage = (event) => {
+        //     const data = JSON.parse(event.data);
+        //     setSearchData(data);
+        //     console.log('Received data:', data);
+        //     // 在这里处理接收到的数据
+        // };
+
+        // socket.onclose = () => {
+        //     console.log('Socket connection closed');
+        //     // 在这里处理连接关闭的逻辑
+        // };
 
 
     }
@@ -167,14 +243,14 @@ function Vote() {
                         </div>
                         <div className="flex justify-center items-center h-40">
                             {searchData.length > 0 ? (
-                                <Link to={`/detail/${searchData[1]}`} className="bg-white p-4 rounded-md shadow-sm mb-4">
-                                <div className="flex justify-between items-center mb-2">
-                                  <span className="text-sm text-gray-500">{searchData[1]}</span>
-                                  <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">Active</span>
-                                </div>
-                                <h3 className="text-lg font-semibold">{searchData[2]}</h3>
-                                <p className="text-gray-600 text-sm mb-2 line-clamp-2">{searchData[3]}</p>
-                              </Link>
+                                <Link to={`/detail/${searchData[0].id}`} className="bg-white p-4 rounded-md shadow-sm mb-4">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="text-sm text-gray-500">{searchData[0].id}</span>
+                                        <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">Active</span>
+                                    </div>
+                                    <h3 className="text-lg font-semibold">{searchData[0].title}</h3>
+                                    <p className="text-gray-600 text-sm mb-2 line-clamp-2">{searchData[0].info}</p>
+                                </Link>
                             ) : (
                                 <img
                                     src="https://lf3-static.bytednsdoc.com/obj/eden-cn/bqaeh7vhobd/feedback.svg"
@@ -193,15 +269,15 @@ function Vote() {
                         {InitSearchData.map((item) => (
                             <Link to={`/detail/${item.id}`}>
                                 <div className="bg-white p-4 rounded-md shadow-sm mb-4" key={item.id}>
-                                <div className="flex justify-between items-center mb-2">
-                                    <span className="text-sm text-gray-500">{item.id}</span>
-                                    <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">Active</span>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="text-sm text-gray-500">{item.id}</span>
+                                        <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">Active</span>
+                                    </div>
+                                    <h3 className="text-lg font-semibold">{item.title}</h3>
+                                    <p className="text-gray-600 text-sm mb-2 line-clamp-2">{item.info}</p>
                                 </div>
-                                <h3 className="text-lg font-semibold">{item.title}</h3>
-                                <p className="text-gray-600 text-sm mb-2 line-clamp-2">{item.info}</p>
-                            </div> 
                             </Link>
-                           
+
                         ))}
 
                         <Link to="/detail">

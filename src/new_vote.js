@@ -3,17 +3,54 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 // import { FontAwesomeIcon } from './logo.png';
 // import { faMinus } from './logo.png';
-import { Relay, generateSecretKey, getPublicKey } from 'nostr-tools'
-import { finalizeEvent } from 'nostr-tools'
+import { Relay, generateSecretKey, getPublicKey } from 'nostr-tools';
+import { finalizeEvent } from 'nostr-tools';
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+
+import { getDatabase, ref, push, set, onValue } from "firebase/database";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+
+
+let choiceValue = 'single';
 
 function NewVote() {
 
     const [title, setTitle] = React.useState('');
     const [content, setContent] = React.useState('');
     const [multipleChoiceAllowed, setMultipleChoiceAllowed] = React.useState(false);
+     
     const [startTime, setStartTime] = React.useState('');
     const [endTime, setEndTime] = React.useState('');
-    const [options, setOptions] = React.useState(['Option 1', 'Option 2', 'Option 3']);
+    const [options, setOptions] = React.useState(['Yes', 'No']);
+
+    
+
+
+    /**
+     * firebase part
+     */
+    const firebaseConfig = {
+        apiKey: "AIzaSyCgRzMHIfhPZnIXedgNuqqoyQz5sausEu8",
+        authDomain: "vote-2b9d8.firebaseapp.com",
+        projectId: "vote-2b9d8",
+        storageBucket: "vote-2b9d8.appspot.com",
+        messagingSenderId: "1050103509183",
+        appId: "1:1050103509183:web:15565360fa1d58fe96560a",
+        measurementId: "G-NZXRF34DPT",
+        databaseURL: "https://vote-2b9d8-default-rtdb.asia-southeast1.firebasedatabase.app/"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    // Initialize Realtime Database and get a reference tco the service
+    const database = getDatabase(app);
+
+
 
 
     const handleOptionChange = (e, index) => {
@@ -32,13 +69,19 @@ function NewVote() {
         setOptions(updatedOptions);
     };
 
+
     const handleStartTimeChange = (e) => {
+
+        // setStartTime(new Date(e.target.value).getTime());
         setStartTime(e.target.value);
     };
 
     const handleEndTimeChange = (e) => {
         setEndTime(e.target.value);
+        // setStartTime(new Date(e.target.value).getTime());
     };
+
+  
 
     const handleTitleChange = (e) => {
         setTitle(e.target.value);
@@ -48,9 +91,21 @@ function NewVote() {
         setContent(e.target.value);
     };
 
-    const handleMultipleChoiceAllowedChange = (e) => {
-        setMultipleChoiceAllowed(e.target.checked);
-    };
+    const handleMultipleChoiceAllowedChange = () => {
+
+
+        if (!multipleChoiceAllowed){
+            setMultipleChoiceAllowed(!multipleChoiceAllowed);
+            choiceValue = 'mult'
+        }else{
+            setMultipleChoiceAllowed(!multipleChoiceAllowed);
+            choiceValue = 'single'
+        }
+
+        console.log(choiceValue);
+       
+       
+      };
 
     const handlePublish = () => {
         // 访问收集的数据
@@ -61,7 +116,7 @@ function NewVote() {
         console.log('Options:', options);
         console.log('Multiple Choice Allowed:', multipleChoiceAllowed);
 
-        var data = {
+        var jsonData = {
             title: title,
             content: content,
             startTime: startTime,
@@ -70,9 +125,9 @@ function NewVote() {
             multipleChoiceAllowed: multipleChoiceAllowed
         };
 
-        var jsonData = JSON.stringify(data);
 
-        connectAndSubscribe( jsonData);
+
+        connectAndSubscribe(jsonData);
 
 
         // 执行其他操作...
@@ -82,6 +137,43 @@ function NewVote() {
 
 
     async function connectAndSubscribe(jsonData) {
+
+
+
+        console.log("jsonData", jsonData)
+
+
+        const db = getDatabase();
+        const dataRef = ref(db, "vote");
+
+        const newData = {
+            kind: 301,
+            created_at: Math.floor(Date.now() / 1000),
+            tags: ["poll", choiceValue, "0", jsonData.startTime,jsonData.endTime,jsonData.title, jsonData.content, jsonData.options],
+            content: "",
+        }
+
+        console.log("new Datais ",newData);
+
+        try {
+            const newChildRef = push(dataRef);
+            await set(newChildRef, newData);
+            console.log("Data added with key: ", newChildRef.key);
+        } catch (error) {
+            console.error("Error adding data: ", error);
+        }
+
+        console.log("Storage in firebase", jsonData)
+
+        onValue(dataRef, (snapshot) => {
+            const data = snapshot.val();
+            console.log("Data from Firebase:", data);
+        });
+
+        //
+
+
+
         const relay = await Relay.connect('ws://47.129.0.53:8080');
         console.log(`Connected to ${relay.url}`);
 
@@ -89,21 +181,27 @@ function NewVote() {
         let sk = generateSecretKey()
         let pk = getPublicKey(sk)
 
+        let tags =  ["poll", choiceValue, "0", jsonData.startTime,jsonData.endTime, jsonData.title, jsonData.content]
+        for(var op in jsonData.options){
+            tags.push(jsonData.options[op])
+        }
 
-
+        console.log('tags',tags);
 
         let eventTemplate = {
             kind: 301,
             created_at: Math.floor(Date.now() / 1000),
-            tags: [["poll", "single", "0", "I'm a title!", "This a demo survey!", "Option 1", "Option 2", "Option 3"]],
-            content: jsonData,
+            tags: [tags],
+            content: "",
         }
+
+
         // this assigns the pubkey, calculates the event id and signs the event in a single step
         const signedEvent = finalizeEvent(eventTemplate, sk)
 
-        console.log("signedEvent", String(signedEvent.created_at))
-        await relay.publish(signedEvent)
-        console.log("write result")
+        console.log("signedEvent", signedEvent)
+        let result = await relay.publish(signedEvent)
+        console.log("write result",result)
         relay.close()
 
 
@@ -200,6 +298,7 @@ function NewVote() {
                                     onChange={handleEndTimeChange}
                                     placeholder="End time"
                                 />
+                                
                             </div>
                         </div>
 
@@ -229,13 +328,16 @@ function NewVote() {
                                 Option
                             </label>
                             <div className="flex justify-between items-center mb-2">
-                                <span className="text-gray-700 text-sm">Multiple choice allowed</span>
-                                <label className="switch">
-                                    <input checked={multipleChoiceAllowed}
-                                        onChange={handleMultipleChoiceAllowedChange} type="checkbox" />
-                                    <span className="slider round"></span>
-                                </label>
-                            </div>
+  <span className="text-gray-700 text-sm">Multiple choice allowed</span>
+  <label className="switch">
+    <input
+      checked={!!multipleChoiceAllowed} // 使用双重否定运算符将值转换为布尔类型
+      onChange={handleMultipleChoiceAllowedChange}
+      type="checkbox"
+    />
+    <span className="slider round"></span>
+  </label>
+</div>
                             <div className="flex flex-wrap gap-4 mb-4">
                                 {options.map((option, index) => (
                                     <div key={index} className="relative">
@@ -269,7 +371,7 @@ function NewVote() {
                             <button onClick={handlePublish} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
 
 
-                                {/* <Link to="/detail"> publish </Link> */}
+                                <Link to="/"> publish </Link>
                             </button>
                         </div>
                     </div>
