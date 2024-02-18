@@ -1,9 +1,28 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { generateSecretKey, getPublicKey } from 'nostr-tools';
+import { generateMnemonic, mnemonicToSeedSync, validateMnemonic } from 'bip39';
+import { Buffer } from 'buffer';
+
+
+// 配置全局的 Buffer 对象,
+if (typeof window !== 'undefined') {
+  window.Buffer = Buffer;
+}
+
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [mnemonic, setMnemonic] = useState('');
+  const [isInvalid, setIsInvalid] = useState(false); // 添加状态用于追踪输入的合法性
+
+  const navigate = useNavigate();
+
+  const handleMnemonicChange = (event) => {
+    setMnemonic(event.target.value);
+  };
+
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
@@ -19,6 +38,55 @@ const Login = () => {
     console.log('Email:', email);
     console.log('Password:', password);
   };
+
+  async function handleGenerateNew() {
+    let sk = generateMnemonic();
+    console.log(sk)
+    try {
+      const seed = mnemonicToSeedSync(sk);  //cousin rubber monster push lady lady rain wrist magnet slogan sword cool
+      const convertedArray = new Uint8Array(seed.slice(0, 32));
+      localStorage.setItem('sk', convertedArray)
+      console.log('convertedArray:', convertedArray);
+    } catch (error) {
+      // 处理错误情况
+      console.error('转换失败:', error);
+    }
+
+
+
+  }
+
+  async function handleLogin() {
+    //     const sk = localStorage.getItem('sk');
+    // console.log('sk', sk);
+
+    try {
+      console.log('mnemonic',validateMnemonic(mnemonic));
+      if (validateMnemonic(String(mnemonic))) {
+        console.log('助记词合法');
+
+        // 进行其他操作，如转换种子等
+        const seed = mnemonicToSeedSync(mnemonic);
+        const convertedArray = new Uint8Array(seed.slice(0, 32));
+        localStorage.setItem('sk', convertedArray);
+        console.log('convertedArray:', convertedArray);
+
+        // 导航到目标页面
+        navigate("/");
+      } else {
+        console.log('助记词不合法');
+        // 处理助记词不合法的情况
+       setIsInvalid(true)
+      }
+    } catch (error) {
+      console.error('转换失败:', error);
+      // 处理错误情况
+    }
+  }
+
+
+
+
 
   return (
 
@@ -58,7 +126,18 @@ const Login = () => {
         height: 8px;
         width: 35.7%;
     }
-
+    .invalid-input {
+      animation: flash-green 1s;
+    }
+    
+    @keyframes flash-green {
+      0% {
+        background-color: gray;
+      }
+      100% {
+        background-color: lightgreen;
+      }
+    }
     
     `}
         </style>
@@ -104,23 +183,40 @@ const Login = () => {
                 className="rounded-full mx-auto mb-4"
                 alt="Avatar"
               />
-              <h1 className="text-xl font-bold text-center">Sign In</h1>
+              <h1 className="text-xl font-bold text-center">Welcome to Zsocial</h1>
               <form className="flex flex-col gap-4 mt-4">
                 <input
                   type="text"
-                  placeholder="nsec, npub, nip-05, hex, mnemonic"
-                  className="bg-gray-200 rounded-full py-2 px-28" // Increased px value to double the width
-                  value=""
+                  placeholder="mnemonic"
+                  className={`bg-gray-200 rounded-full py-2 px-28 ${isInvalid ? "invalid-input" : ""}`} // 根据状态添加或移除 CSS 类
+                  value={mnemonic}
+                  onChange={handleMnemonicChange}
                 />
-                <button
-                  type="button"
-                  className="bg-orange-500 text-white rounded-full py-2 px-4"
-                >
-                  Login
-                </button>
+
+
+                <div className="flex justify-between mb-4">
+                  <button
+                    type="button"
+                    className="bg-gray-500 text-white rounded-full py-2 px-16"
+                    onClick={handleGenerateNew}
+                  >
+
+                    <Link to="/">  Generate New </Link>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="bg-orange-500 text-white rounded-full py-2 px-14"
+                    onClick={handleLogin}
+                  >
+                    Login
+                    {/* <Link to="/"> Login </Link> */}
+                  </button>
+                </div>
+
               </form>
               <div className="flex flex-col items-center mt-4">
-                <a href="/login/sign-up">Don't have an account?</a>
+                {/* <a href="/login/sign-up">Welcome to Zsocial</a> */}
               </div>
             </div>
           </div>

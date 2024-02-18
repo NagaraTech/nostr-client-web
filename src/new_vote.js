@@ -23,12 +23,12 @@ function NewVote() {
     const [title, setTitle] = React.useState('');
     const [content, setContent] = React.useState('');
     const [multipleChoiceAllowed, setMultipleChoiceAllowed] = React.useState(false);
-     
+
     const [startTime, setStartTime] = React.useState('');
     const [endTime, setEndTime] = React.useState('');
     const [options, setOptions] = React.useState(['Yes', 'No']);
 
-    
+
 
 
     /**
@@ -81,7 +81,7 @@ function NewVote() {
         // setStartTime(new Date(e.target.value).getTime());
     };
 
-  
+
 
     const handleTitleChange = (e) => {
         setTitle(e.target.value);
@@ -94,18 +94,18 @@ function NewVote() {
     const handleMultipleChoiceAllowedChange = () => {
 
 
-        if (!multipleChoiceAllowed){
+        if (!multipleChoiceAllowed) {
             setMultipleChoiceAllowed(!multipleChoiceAllowed);
             choiceValue = 'mult'
-        }else{
+        } else {
             setMultipleChoiceAllowed(!multipleChoiceAllowed);
             choiceValue = 'single'
         }
 
         console.log(choiceValue);
-       
-       
-      };
+
+
+    };
 
     const handlePublish = () => {
         // 访问收集的数据
@@ -149,11 +149,11 @@ function NewVote() {
         const newData = {
             kind: 301,
             created_at: Math.floor(Date.now() / 1000),
-            tags: ["poll", choiceValue, "0", jsonData.startTime,jsonData.endTime,jsonData.title, jsonData.content, jsonData.options],
+            tags: ["poll", choiceValue, "0", jsonData.startTime, jsonData.endTime, jsonData.title, jsonData.content, jsonData.options],
             content: "",
         }
 
-        console.log("new Datais ",newData);
+        console.log("new Datais ", newData);
 
         try {
             const newChildRef = push(dataRef);
@@ -178,15 +178,23 @@ function NewVote() {
         console.log(`Connected to ${relay.url}`);
 
         // let's publish a new event while simultaneously monitoring the relay for it
-        let sk = generateSecretKey()
+        let local_sk = localStorage.getItem('sk')
+
+        const numberArray = local_sk.split(",").map(Number)
+        // 确保数组长度为32
+        while (numberArray.length < 32) {
+            numberArray.push(0); // 填充0
+        }
+        let sk = numberArray.map(num => num.toString(16).padStart(2, '0')).join('');;
+        console.log('sk',sk)
         let pk = getPublicKey(sk)
 
-        let tags =  ["poll", choiceValue, "0", jsonData.startTime,jsonData.endTime, jsonData.title, jsonData.content]
-        for(var op in jsonData.options){
+        let tags = ["poll", choiceValue, "0", jsonData.startTime, jsonData.endTime, jsonData.title, jsonData.content]
+        for (var op in jsonData.options) {
             tags.push(jsonData.options[op])
         }
 
-        console.log('tags',tags);
+        console.log('tags', tags);
 
         let eventTemplate = {
             kind: 301,
@@ -196,12 +204,13 @@ function NewVote() {
         }
 
 
+
         // this assigns the pubkey, calculates the event id and signs the event in a single step
         const signedEvent = finalizeEvent(eventTemplate, sk)
 
         console.log("signedEvent", signedEvent)
         let result = await relay.publish(signedEvent)
-        console.log("write result",result)
+        console.log("write result", result)
         relay.close()
 
 
@@ -298,7 +307,7 @@ function NewVote() {
                                     onChange={handleEndTimeChange}
                                     placeholder="End time"
                                 />
-                                
+
                             </div>
                         </div>
 
@@ -328,16 +337,16 @@ function NewVote() {
                                 Option
                             </label>
                             <div className="flex justify-between items-center mb-2">
-  <span className="text-gray-700 text-sm">Multiple choice allowed</span>
-  <label className="switch">
-    <input
-      checked={!!multipleChoiceAllowed} // 使用双重否定运算符将值转换为布尔类型
-      onChange={handleMultipleChoiceAllowedChange}
-      type="checkbox"
-    />
-    <span className="slider round"></span>
-  </label>
-</div>
+                                <span className="text-gray-700 text-sm">Multiple choice allowed</span>
+                                <label className="switch">
+                                    <input
+                                        checked={!!multipleChoiceAllowed} // 使用双重否定运算符将值转换为布尔类型
+                                        onChange={handleMultipleChoiceAllowedChange}
+                                        type="checkbox"
+                                    />
+                                    <span className="slider round"></span>
+                                </label>
+                            </div>
                             <div className="flex flex-wrap gap-4 mb-4">
                                 {options.map((option, index) => (
                                     <div key={index} className="relative">

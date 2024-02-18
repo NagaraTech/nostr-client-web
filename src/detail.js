@@ -150,9 +150,9 @@ function Detial() {
         <Link to="/">  <a>
           <img src={logopng} alt="Logo" className="h-8" ></img>
         </a></Link>
-        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        <span className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
           Login
-        </button>
+        </span>
       </header>
       <main className="flex gap-4">
         <section className="w-2/3 p-4 bg-white shadow rounded">

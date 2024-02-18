@@ -17,14 +17,19 @@ function Vote() {
     const [searchData, setSearchData] = useState([]);
 
 
-
-    // const relay = await Relay.connect('wss://relay.example.com')
     useEffect(() => {
         InitEvent();
+    //     const sk = localStorage.getItem('sk');
+    // console.log('sk', sk);
+
     }, []);
+
+
 
     async function InitEvent() {
 
+
+       
 
         const firebaseConfig = {
             apiKey: "AIzaSyCgRzMHIfhPZnIXedgNuqqoyQz5sausEu8",
@@ -142,6 +147,8 @@ function Vote() {
     }
 
 
+
+
     return (<div>
         <head>
             <title>DAO Voting Interface</title>
@@ -200,7 +207,7 @@ function Vote() {
 
 
 
-
+{/* 
                     <button
                         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-8"
 
@@ -208,7 +215,7 @@ function Vote() {
 
                         <Link to="/login"> Login</Link>
 
-                    </button>
+                    </button> */}
 
 
 
