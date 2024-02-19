@@ -15,12 +15,24 @@ function Vote() {
     const [searchText, setSearchText] = React.useState("");
     const [InitSearchData, setInitSearchData] = useState([]);
     const [searchData, setSearchData] = useState([]);
+    const [addr, setAddr] = React.useState('0x1231');
 
 
     useEffect(() => {
         InitEvent();
     //     const sk = localStorage.getItem('sk');
     // console.log('sk', sk);
+    let local_sk = localStorage.getItem('sk')
+
+    const numberArray = local_sk.split(",").map(Number)
+    // 确保数组长度为32
+    while (numberArray.length < 32) {
+        numberArray.push(0); // 填充0
+    }
+    let sk = numberArray.map(num => num.toString(16).padStart(2, '0')).join('');;
+    console.log('sk', sk)
+
+    setAddr('0x' + getPublicKey(sk))
 
     }, []);
 
@@ -207,15 +219,10 @@ function Vote() {
 
 
 
-{/* 
-                    <button
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-8"
 
-                    >
-
-                        <Link to="/login"> Login</Link>
-
-                    </button> */}
+                    <button className="bg-gray-500 rounded-full hover:bg-gray-700 text-white font-bold py-2 px-4 ml-8">
+                            {addr.length > 10 ? `${addr.substring(0, 5)}...${addr.substring(addr.length - 5)}` : addr}
+                        </button>
 
 
 

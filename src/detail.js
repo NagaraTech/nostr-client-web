@@ -28,10 +28,22 @@ function Detial() {
   const [startDate, setStartDate] = useState('Jan 30, 2024, 1:17 AM');
   const [endDate, setEndDate] = useState('Feb 6, 2024, 1:17 AM');
   const [options, setOptions] = useState(['A', 'B', 'C']);
+  const [addr, setAddr] = React.useState('0x1231');
 
 
   useEffect(() => {
     Init();
+    let local_sk = localStorage.getItem('sk')
+
+    const numberArray = local_sk.split(",").map(Number)
+    // 确保数组长度为32
+    while (numberArray.length < 32) {
+        numberArray.push(0); // 填充0
+    }
+    let sk = numberArray.map(num => num.toString(16).padStart(2, '0')).join('');;
+    console.log('sk', sk)
+
+    setAddr('0x' + getPublicKey(sk))
   }, []);
 
 
@@ -150,9 +162,9 @@ function Detial() {
         <Link to="/">  <a>
           <img src={logopng} alt="Logo" className="h-8" ></img>
         </a></Link>
-        <span className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-          Login
-        </span>
+        <button className="bg-gray-500 rounded-full hover:bg-gray-700 text-white font-bold py-2 px-4 ml-8">
+                            {addr.length > 10 ? `${addr.substring(0, 5)}...${addr.substring(addr.length - 5)}` : addr}
+                        </button>
       </header>
       <main className="flex gap-4">
         <section className="w-2/3 p-4 bg-white shadow rounded">

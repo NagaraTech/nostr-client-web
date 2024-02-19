@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React,{useEffect} from 'react';
 import { Link } from 'react-router-dom';
 // import { FontAwesomeIcon } from './logo.png';
 // import { faMinus } from './logo.png';
@@ -9,6 +9,7 @@ import { finalizeEvent } from 'nostr-tools';
 import { initializeApp } from "firebase/app";
 
 import { getDatabase, ref, push, set, onValue } from "firebase/database";
+
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -27,9 +28,23 @@ function NewVote() {
     const [startTime, setStartTime] = React.useState('');
     const [endTime, setEndTime] = React.useState('');
     const [options, setOptions] = React.useState(['Yes', 'No']);
+    const [addr, setAddr] = React.useState('0x1231');
 
 
+  
+   useEffect(() => {
+    let local_sk = localStorage.getItem('sk')
 
+        const numberArray = local_sk.split(",").map(Number)
+        // 确保数组长度为32
+        while (numberArray.length < 32) {
+            numberArray.push(0); // 填充0
+        }
+        let sk = numberArray.map(num => num.toString(16).padStart(2, '0')).join('');;
+        console.log('sk',sk)
+
+        setAddr('0x'+getPublicKey(sk)) 
+   });
 
     /**
      * firebase part
@@ -187,7 +202,7 @@ function NewVote() {
         }
         let sk = numberArray.map(num => num.toString(16).padStart(2, '0')).join('');;
         console.log('sk',sk)
-        let pk = getPublicKey(sk)
+        // pk = getPublicKey(sk)
 
         let tags = ["poll", choiceValue, "0", jsonData.startTime, jsonData.endTime, jsonData.title, jsonData.content]
         for (var op in jsonData.options) {
@@ -231,15 +246,7 @@ function NewVote() {
 
 
             <div className="container mx-auto px-4 py-8">
-
-
-
-
                 <header className="flex justify-between items-center mb-8 p-4 bg-white shadow rounded">
-
-
-
-
 
                     <Link to="/">  <a>
                         <img src="./logo.png" alt="Logo" className="h-8" ></img>
@@ -247,12 +254,12 @@ function NewVote() {
                     <div className="flex justify-end">
 
 
-                        <button> <Link to="/newvote"> New vote </Link></button>
+                        {/* <button> <Link to="/newvote"> New vote </Link></button> */}
 
 
-                        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-8">
-                            Connect wallet
-                        </button>
+                        <button className="bg-gray-500 rounded-full hover:bg-gray-700 text-white font-bold py-2 px-4 ml-8">
+  {addr.length > 10 ? `${addr.substring(0, 5)}...${addr.substring(addr.length - 5)}` : addr}
+</button>
 
                     </div>
 
@@ -380,7 +387,7 @@ function NewVote() {
                             <button onClick={handlePublish} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
 
 
-                                <Link to="/"> publish </Link>
+                             <Link to='/'> submmit </Link>
                             </button>
                         </div>
                     </div>

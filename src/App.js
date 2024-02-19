@@ -83,8 +83,9 @@ function App() {
 
     <BrowserRouter>
       <Routes>
+      <Route path="/login" element={<Login />} />
         <Route path="/" element={<Vote />} />
-        <Route path="/login" element={<Login />} />
+       
         <Route path="/detail/:id" element={<Detial />} />
         <Route path="/newvote" element={<NewVote />} />
 
