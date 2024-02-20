@@ -32,6 +32,7 @@ function Detial() {
   const [endDate, setEndDate] = useState('Feb 6, 2024, 1:17 AM');
   const [options, setOptions] = useState(['A', 'B', 'C']);
   const [addr, setAddr] = React.useState('0x1231');
+  const [optionsNum, setOptionsNum] = useState(['A', 'B', 'C']);
 
 
   useEffect(() => {
@@ -138,7 +139,7 @@ function Detial() {
           "title": data.tags[0].values[5],
           "info": data.tags[0].values[6]
         })
-
+        setOptions(data.tags[0].values.slice(7))
         choiceValue = multipleChoice
         // responseCount++; // 响应计数器加一
 
@@ -146,6 +147,9 @@ function Detial() {
       } else if (responseCount === 2) {
         const secondData = JSON.parse(event.data);
         console.log('2 Received data:', secondData);
+        const OptionIndexData = secondData.filter((_, index) => index % 2 === 1);
+        console.log("OptionIndexData", OptionIndexData)
+        setOptionsNum(OptionIndexData)
       }
 
       responseCount++; // 响应计数器加一
@@ -263,26 +267,7 @@ function Detial() {
             <h2 className="text-xl font-bold mb-2">Current results</h2>
             <hr className="mb-4" />
             <div className="text-sm">
-              {/* <div className="mb-2">
-                <div className="flex items-center">
-
-                  <div>
-                    <span className="font-bold">For</span>
-                    <span>13M ARB</span>
-                  </div>
-
-                </div>
-
-                <div className="flex items-center">
-                  <div className="flex items-center flex-grow bg-gray-300 h-2 rounded-full">
-                    <div className="h-full bg-blue-500 rounded-full" style={{ width: '96.81%' }}></div>
-                  </div>
-                  <div className="ml-2">96.81%</div>
-
-                </div>
-
-
-              </div> */}
+   
 
               {options.map((option, index) => (
                 <div className="flex justify-between mb-4" key={index}>
@@ -290,7 +275,7 @@ function Detial() {
                   <label htmlFor={`option${index + 1}`} className="cursor-pointer">
                     {option}
                   </label>
-                  <span>100k</span>
+                  <span> {optionsNum[index]}</span>
 
                 </div>
               ))}
