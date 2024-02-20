@@ -20,19 +20,19 @@ function Vote() {
 
     useEffect(() => {
         InitEvent();
-    //     const sk = localStorage.getItem('sk');
-    // console.log('sk', sk);
-    let local_sk = localStorage.getItem('sk')
+        //     const sk = localStorage.getItem('sk');
+        // console.log('sk', sk);
+        let local_sk = localStorage.getItem('sk')
 
-    const numberArray = local_sk.split(",").map(Number)
-    // 确保数组长度为32
-    while (numberArray.length < 32) {
-        numberArray.push(0); // 填充0
-    }
-    let sk = numberArray.map(num => num.toString(16).padStart(2, '0')).join('');;
-    console.log('sk', sk)
+        const numberArray = local_sk.split(",").map(Number)
+        // 确保数组长度为32
+        while (numberArray.length < 32) {
+            numberArray.push(0); // 填充0
+        }
+        let sk = numberArray.map(num => num.toString(16).padStart(2, '0')).join('');;
+        console.log('sk', sk)
 
-    setAddr('0x' + getPublicKey(sk))
+        setAddr('0x' + getPublicKey(sk))
 
     }, []);
 
@@ -41,59 +41,64 @@ function Vote() {
     async function InitEvent() {
 
 
-       
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyCgRzMHIfhPZnIXedgNuqqoyQz5sausEu8",
-            authDomain: "vote-2b9d8.firebaseapp.com",
-            projectId: "vote-2b9d8",
-            storageBucket: "vote-2b9d8.appspot.com",
-            messagingSenderId: "1050103509183",
-            appId: "1:1050103509183:web:15565360fa1d58fe96560a",
-            measurementId: "G-NZXRF34DPT",
-            databaseURL: "https://vote-2b9d8-default-rtdb.asia-southeast1.firebasedatabase.app/"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        // Initialize Realtime Database and get a reference tco the service
-        const database = getDatabase(app);
-
-        const db = getDatabase();
-        const dataRef = ref(db, "vote");
-
-        onValue(dataRef, (snapshot) => {
-            const data = snapshot.val();
-            // Convert data to desired format
-            const convertedData = Object.keys(data).map((key) => {
-                const item = data[key];
-                return {
-                    id: key,
-                    title: item.tags[5],
-                    info: item.tags[6]
-                };
-            });
-
-            console.log(convertedData);
-            setInitSearchData(convertedData);
-            console.log("Data from Firebase:", data);
-        });
 
 
+        // const firebaseConfig = {
+        //     apiKey: "AIzaSyCgRzMHIfhPZnIXedgNuqqoyQz5sausEu8",
+        //     authDomain: "vote-2b9d8.firebaseapp.com",
+        //     projectId: "vote-2b9d8",
+        //     storageBucket: "vote-2b9d8.appspot.com",
+        //     messagingSenderId: "1050103509183",
+        //     appId: "1:1050103509183:web:15565360fa1d58fe96560a",
+        //     measurementId: "G-NZXRF34DPT",
+        //     databaseURL: "https://vote-2b9d8-default-rtdb.asia-southeast1.firebasedatabase.app/"
+        // };
 
-        const socket = new WebSocket('ws://47.129.0.53:8080');
+        // // Initialize Firebase
+        // const app = initializeApp(firebaseConfig);
+        // // Initialize Realtime Database and get a reference tco the service
+        // const database = getDatabase(app);
+
+        // const db = getDatabase();
+        // const dataRef = ref(db, "vote");
+
+        // onValue(dataRef, (snapshot) => {
+        //     const data = snapshot.val();
+        //     // Convert data to desired format
+        //     const convertedData = Object.keys(data).map((key) => {
+        //         const item = data[key];
+        //         return {
+        //             id: key,
+        //             title: item.tags[5],
+        //             info: item.tags[6]
+        //         };
+        //     });
+
+        //     console.log(convertedData);
+        //     // setInitSearchData(convertedData);
+        //     console.log("Data from Firebase:", data);
+        // });
+
+
+
+        const socket = new WebSocket('wss://zsocialrelay1.nagara.dev');
         // RelayServer.send('["QUERY_SID"]'); 
         socket.onopen = () => {
-            const message = JSON.stringify(["QUERY_SID"]);
+            const message = JSON.stringify(["QUERYPOLLLIST", ""]);
             socket.send(message);
         };
 
+
+
         socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            // setInitSearchData(data);
+            setInitSearchData(data);
             console.log('Received data:', data);
-            // 在这里处理接收到的数据
+
         };
+
+
+
 
         socket.onclose = () => {
             console.log('Socket connection closed');
@@ -221,8 +226,8 @@ function Vote() {
 
 
                     <button className="bg-gray-500 rounded-full hover:bg-gray-700 text-white font-bold py-2 px-4 ml-8">
-                            {addr.length > 10 ? `${addr.substring(0, 5)}...${addr.substring(addr.length - 5)}` : addr}
-                        </button>
+                        {addr.length > 10 ? `${addr.substring(0, 5)}...${addr.substring(addr.length - 5)}` : addr}
+                    </button>
 
 
 
@@ -281,14 +286,14 @@ function Vote() {
                         <h2 className="text-2xl font-semibold mb-4">Proposals</h2>
 
                         {InitSearchData.map((item) => (
-                            <Link to={`/detail/${item.id}`}>
-                                <div className="bg-white p-4 rounded-md shadow-sm mb-4" key={item.id}>
+                            <Link to={`/detail/${item[0]}`}>
+                                <div className="bg-white p-4 rounded-md shadow-sm mb-4" key={item[0]}>
                                     <div className="flex justify-between items-center mb-2">
-                                        <span className="text-sm text-gray-500">{item.id}</span>
+                                        <span className="text-sm text-gray-500">      {item[0].length > 10 ? `${item[0].substring(0, 5)}...${item[0].substring(item[0].length - 5)}` : item[0]}  </span>
                                         <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">Active</span>
                                     </div>
-                                    <h3 className="text-lg font-semibold">{item.title}</h3>
-                                    <p className="text-gray-600 text-sm mb-2 line-clamp-2">{item.info}</p>
+                                    <h3 className="text-lg font-semibold">{item[1]}</h3>
+                                    <p className="text-gray-600 text-sm mb-2 line-clamp-2">{item[2]}</p>
                                 </div>
                             </Link>
 

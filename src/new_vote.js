@@ -1,5 +1,5 @@
 
-import React,{useEffect} from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 // import { FontAwesomeIcon } from './logo.png';
 // import { faMinus } from './logo.png';
@@ -31,9 +31,9 @@ function NewVote() {
     const [addr, setAddr] = React.useState('0x1231');
 
 
-  
-   useEffect(() => {
-    let local_sk = localStorage.getItem('sk')
+
+    useEffect(() => {
+        let local_sk = localStorage.getItem('sk')
 
         const numberArray = local_sk.split(",").map(Number)
         // 确保数组长度为32
@@ -41,10 +41,10 @@ function NewVote() {
             numberArray.push(0); // 填充0
         }
         let sk = numberArray.map(num => num.toString(16).padStart(2, '0')).join('');;
-        console.log('sk',sk)
+        console.log('sk', sk)
 
-        setAddr('0x'+getPublicKey(sk)) 
-   });
+        setAddr('0x' + getPublicKey(sk))
+    });
 
     /**
      * firebase part
@@ -189,7 +189,7 @@ function NewVote() {
 
 
 
-        const relay = await Relay.connect('ws://47.129.0.53:8080');
+        const relay = await Relay.connect('wss://zsocialrelay1.nagara.dev');
         console.log(`Connected to ${relay.url}`);
 
         // let's publish a new event while simultaneously monitoring the relay for it
@@ -201,7 +201,7 @@ function NewVote() {
             numberArray.push(0); // 填充0
         }
         let sk = numberArray.map(num => num.toString(16).padStart(2, '0')).join('');;
-        console.log('sk',sk)
+        console.log('sk', sk)
         // pk = getPublicKey(sk)
 
         let tags = ["poll", choiceValue, "0", jsonData.startTime, jsonData.endTime, jsonData.title, jsonData.content]
@@ -258,8 +258,8 @@ function NewVote() {
 
 
                         <button className="bg-gray-500 rounded-full hover:bg-gray-700 text-white font-bold py-2 px-4 ml-8">
-  {addr.length > 10 ? `${addr.substring(0, 5)}...${addr.substring(addr.length - 5)}` : addr}
-</button>
+                            {addr.length > 10 ? `${addr.substring(0, 5)}...${addr.substring(addr.length - 5)}` : addr}
+                        </button>
 
                     </div>
 
@@ -387,7 +387,7 @@ function NewVote() {
                             <button onClick={handlePublish} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
 
 
-                             <Link to='/'> submmit </Link>
+                                <Link to='/'> submmit </Link>
                             </button>
                         </div>
                     </div>

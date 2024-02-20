@@ -32,7 +32,9 @@ function Detial() {
 
 
   useEffect(() => {
-    Init();
+    // Init();  firebase 
+
+    InitMetaData()
     let local_sk = localStorage.getItem('sk')
 
     const numberArray = local_sk.split(",").map(Number)
@@ -100,9 +102,56 @@ function Detial() {
     });
   }
 
+ async function InitMetaData(){
+  const socket = new WebSocket('wss://zsocialrelay1.nagara.dev');
+  // RelayServer.send('["QUERY_SID"]'); 
+
+
+  let responseCount = 1
+  socket.onopen = () => {
+      const message = JSON.stringify(["QUERYEVENTMETA",id]);
+      socket.send(message);
+      socket.send(JSON.stringify( ["QUERY", {"id":"082155c14942cbe52fcc188711cdce699c812da4532d55af34cc557ae6728b98"}]))
+  };
+
+  socket.onmessage = (event) => {
+    if (responseCount === 1) {
+      const data = JSON.parse(event.data);
+      console.log( '1 Received data:', data);
+
+      console.log('Received tags:', data.tags[0]);
+      setVoteId(id)
+      setMultipleChoice(data.tags[0].values[1])
+      setStartDate(data.tags[0].values[3])
+      setEndDate(data.tags[0].values[4])
+      setInitSearchData({
+        "id": id,
+        "title": data.tags[0].values[5],
+        "info": data.tags[0].values[6]
+      })
+
+      choiceValue = multipleChoice
+      // responseCount++; // 响应计数器加一
+
+      console.log("responseCount",responseCount)
+    } else if (responseCount === 2) {
+      const secondData = JSON.parse(event.data);
+      console.log('2 Received data:', secondData);
+    }
+
+    responseCount++; // 响应计数器加一
+
+  };
+
+  // socket.onclose = () => {
+  //     console.log('Socket connection closed');
+  //     // 在这里处理连接关闭的逻辑
+  // };
+ }
+
 
   async function handleVoteClick() {
-    const relay = await Relay.connect('ws://47.129.0.53:8080');
+    const relay = await Relay.connect('wss://zsocialrelay1.nagara.dev');
     console.log(`Connected to ${relay.url}`);
 
     // let's publish a new event while simultaneously monitoring the relay for it
@@ -168,10 +217,10 @@ function Detial() {
       </header>
       <main className="flex gap-4">
         <section className="w-2/3 p-4 bg-white shadow rounded">
-          <h1 className="text-xl font-bold mb-4">{InitSearchData[0].title}</h1>
+          <h1 className="text-xl font-bold mb-4">{InitSearchData.title}</h1>
           <article className="text-gray-700">
             <p>
-              {InitSearchData[0].info}
+              {InitSearchData.info}
             </p>
           </article>
         </section>
@@ -182,7 +231,9 @@ function Detial() {
             <div className="text-sm">
               <div className="flex justify-between mb-2">
                 <span className="font-bold">VoteId</span>
-                <span>{voteId}</span>
+                <span>
+                {voteId.length > 10 ? `${voteId.substring(0, 5)}...${voteId.substring(addr.length - 5)}` : voteId}
+                </span>
               </div>
               <div className="flex justify-between mb-2">
                 <span className="font-bold">Multiple Choice</span>
