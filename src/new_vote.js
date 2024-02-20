@@ -35,17 +35,17 @@ function NewVote() {
 
         if (local_sk == null){
             navigate("/login");
+        }else{
+            const numberArray = local_sk.split(",").map(Number)
+            // 确保数组长度为32
+            while (numberArray.length < 32) {
+                numberArray.push(0); // 填充0
+            }
+            let sk = numberArray.map(num => num.toString(16).padStart(2, '0')).join('');;
+            console.log('sk', sk)
+    
+            setAddr('0x' + getPublicKey(sk))
         }
-
-        const numberArray = local_sk.split(",").map(Number)
-        // 确保数组长度为32
-        while (numberArray.length < 32) {
-            numberArray.push(0); // 填充0
-        }
-        let sk = numberArray.map(num => num.toString(16).padStart(2, '0')).join('');;
-        console.log('sk', sk)
-
-        setAddr('0x' + getPublicKey(sk))
     });
 
     /**

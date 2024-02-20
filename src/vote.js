@@ -20,23 +20,26 @@ function Vote() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        InitEvent();
-        //     const sk = localStorage.getItem('sk');
-        // console.log('sk', sk);
+
         let local_sk = localStorage.getItem('sk')
 
         if (local_sk == null){
             navigate("/login");
+        }else{
+            const numberArray = local_sk.split(",").map(Number)
+            // 确保数组长度为32
+            while (numberArray.length < 32) {
+                numberArray.push(0); // 填充0
+            }
+            let sk = numberArray.map(num => num.toString(16).padStart(2, '0')).join('');;
+            console.log('sk', sk)
+    
+            setAddr('0x' + getPublicKey(sk))
         }
-        const numberArray = local_sk.split(",").map(Number)
-        // 确保数组长度为32
-        while (numberArray.length < 32) {
-            numberArray.push(0); // 填充0
-        }
-        let sk = numberArray.map(num => num.toString(16).padStart(2, '0')).join('');;
-        console.log('sk', sk)
 
-        setAddr('0x' + getPublicKey(sk))
+        InitEvent();
+        
+        
 
     }, []);
 
