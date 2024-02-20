@@ -120,7 +120,7 @@ function Detial() {
     socket.onopen = () => {
       const message = JSON.stringify(["QUERYEVENTMETA", id]);
       socket.send(message);
-      socket.send(JSON.stringify(["QUERY", { "id": "082155c14942cbe52fcc188711cdce699c812da4532d55af34cc557ae6728b98" }]))
+      socket.send(JSON.stringify(["QUERY", { "id": id }]))
     };
 
     socket.onmessage = (event) => {
