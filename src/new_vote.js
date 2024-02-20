@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link,useNavigate } from 'react-router-dom';
 // import { FontAwesomeIcon } from './logo.png';
 // import { faMinus } from './logo.png';
 import { Relay, generateSecretKey, getPublicKey } from 'nostr-tools';
@@ -10,17 +10,15 @@ import { initializeApp } from "firebase/app";
 
 import { getDatabase, ref, push, set, onValue } from "firebase/database";
 
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 
 
 let choiceValue = 'single';
 
 function NewVote() {
 
+
+    const navigate = useNavigate();
     const [title, setTitle] = React.useState('');
     const [content, setContent] = React.useState('');
     const [multipleChoiceAllowed, setMultipleChoiceAllowed] = React.useState(false);
@@ -34,6 +32,10 @@ function NewVote() {
 
     useEffect(() => {
         let local_sk = localStorage.getItem('sk')
+
+        if (local_sk == null){
+            navigate("/login");
+        }
 
         const numberArray = local_sk.split(",").map(Number)
         // 确保数组长度为32

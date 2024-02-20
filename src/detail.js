@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useParams } from 'react-router-dom';
+import { useParams,useNavigate } from 'react-router-dom';
 import { initializeApp } from "firebase/app";
 import logopng from './logo.png'
 import { Relay, generateSecretKey, getPublicKey } from 'nostr-tools';
@@ -11,11 +11,14 @@ import { getDatabase, ref, push, set, onValue } from "firebase/database";
 
 
 
-let choiceValue ='single'
+let choiceValue = 'single'
 
 function Detial() {
 
   const { id } = useParams();
+
+  const navigate = useNavigate();
+
   console.log("id", id);
   const [InitSearchData, setInitSearchData] = useState([{
     id: "key",
@@ -36,11 +39,15 @@ function Detial() {
 
     InitMetaData()
     let local_sk = localStorage.getItem('sk')
+    if (local_sk == null) {
+      navigate("/login");
+    }
+
 
     const numberArray = local_sk.split(",").map(Number)
     // 确保数组长度为32
     while (numberArray.length < 32) {
-        numberArray.push(0); // 填充0
+      numberArray.push(0); // 填充0
     }
     let sk = numberArray.map(num => num.toString(16).padStart(2, '0')).join('');;
     console.log('sk', sk)
@@ -102,52 +109,52 @@ function Detial() {
     });
   }
 
- async function InitMetaData(){
-  const socket = new WebSocket('wss://zsocialrelay1.nagara.dev');
-  // RelayServer.send('["QUERY_SID"]'); 
+  async function InitMetaData() {
+    const socket = new WebSocket('wss://zsocialrelay1.nagara.dev');
+    // RelayServer.send('["QUERY_SID"]'); 
 
 
-  let responseCount = 1
-  socket.onopen = () => {
-      const message = JSON.stringify(["QUERYEVENTMETA",id]);
+    let responseCount = 1
+    socket.onopen = () => {
+      const message = JSON.stringify(["QUERYEVENTMETA", id]);
       socket.send(message);
-      socket.send(JSON.stringify( ["QUERY", {"id":"082155c14942cbe52fcc188711cdce699c812da4532d55af34cc557ae6728b98"}]))
-  };
+      socket.send(JSON.stringify(["QUERY", { "id": "082155c14942cbe52fcc188711cdce699c812da4532d55af34cc557ae6728b98" }]))
+    };
 
-  socket.onmessage = (event) => {
-    if (responseCount === 1) {
-      const data = JSON.parse(event.data);
-      console.log( '1 Received data:', data);
+    socket.onmessage = (event) => {
+      if (responseCount === 1) {
+        const data = JSON.parse(event.data);
+        console.log('1 Received data:', data);
 
-      console.log('Received tags:', data.tags[0]);
-      setVoteId(id)
-      setMultipleChoice(data.tags[0].values[1])
-      setStartDate(data.tags[0].values[3])
-      setEndDate(data.tags[0].values[4])
-      setInitSearchData({
-        "id": id,
-        "title": data.tags[0].values[5],
-        "info": data.tags[0].values[6]
-      })
+        console.log('Received tags:', data.tags[0]);
+        setVoteId(id)
+        setMultipleChoice(data.tags[0].values[1])
+        setStartDate(data.tags[0].values[3])
+        setEndDate(data.tags[0].values[4])
+        setInitSearchData({
+          "id": id,
+          "title": data.tags[0].values[5],
+          "info": data.tags[0].values[6]
+        })
 
-      choiceValue = multipleChoice
-      // responseCount++; // 响应计数器加一
+        choiceValue = multipleChoice
+        // responseCount++; // 响应计数器加一
 
-      console.log("responseCount",responseCount)
-    } else if (responseCount === 2) {
-      const secondData = JSON.parse(event.data);
-      console.log('2 Received data:', secondData);
-    }
+        console.log("responseCount", responseCount)
+      } else if (responseCount === 2) {
+        const secondData = JSON.parse(event.data);
+        console.log('2 Received data:', secondData);
+      }
 
-    responseCount++; // 响应计数器加一
+      responseCount++; // 响应计数器加一
 
-  };
+    };
 
-  // socket.onclose = () => {
-  //     console.log('Socket connection closed');
-  //     // 在这里处理连接关闭的逻辑
-  // };
- }
+    // socket.onclose = () => {
+    //     console.log('Socket connection closed');
+    //     // 在这里处理连接关闭的逻辑
+    // };
+  }
 
 
   async function handleVoteClick() {
@@ -212,8 +219,8 @@ function Detial() {
           <img src={logopng} alt="Logo" className="h-8" ></img>
         </a></Link>
         <button className="bg-gray-500 rounded-full hover:bg-gray-700 text-white font-bold py-2 px-4 ml-8">
-                            {addr.length > 10 ? `${addr.substring(0, 5)}...${addr.substring(addr.length - 5)}` : addr}
-                        </button>
+          {addr.length > 10 ? `${addr.substring(0, 5)}...${addr.substring(addr.length - 5)}` : addr}
+        </button>
       </header>
       <main className="flex gap-4">
         <section className="w-2/3 p-4 bg-white shadow rounded">
@@ -232,7 +239,7 @@ function Detial() {
               <div className="flex justify-between mb-2">
                 <span className="font-bold">VoteId</span>
                 <span>
-                {voteId.length > 10 ? `${voteId.substring(0, 5)}...${voteId.substring(addr.length - 5)}` : voteId}
+                  {voteId.length > 10 ? `${voteId.substring(0, 5)}...${voteId.substring(addr.length - 5)}` : voteId}
                 </span>
               </div>
               <div className="flex justify-between mb-2">

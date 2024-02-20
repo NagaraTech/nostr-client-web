@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link,useNavigate } from 'react-router-dom';
 
 import { Relay, generateSecretKey, getPublicKey } from 'nostr-tools'
 import { finalizeEvent, verifyEvent } from 'nostr-tools'
@@ -17,6 +17,7 @@ function Vote() {
     const [searchData, setSearchData] = useState([]);
     const [addr, setAddr] = React.useState('0x1231');
 
+    const navigate = useNavigate();
 
     useEffect(() => {
         InitEvent();
@@ -24,6 +25,9 @@ function Vote() {
         // console.log('sk', sk);
         let local_sk = localStorage.getItem('sk')
 
+        if (local_sk == null){
+            navigate("/login");
+        }
         const numberArray = local_sk.split(",").map(Number)
         // 确保数组长度为32
         while (numberArray.length < 32) {
@@ -124,11 +128,6 @@ function Vote() {
                         id: key,
                         title: item.tags[5],
                         info: item.tags[6],
-                        // startdate: item.tags[3],
-                        // enddate: item.tags[4],
-                        // multipleChoiceAllowed: item.tags[1],
-                        // options: item.tags[7]
-
                     };
                 });
 
