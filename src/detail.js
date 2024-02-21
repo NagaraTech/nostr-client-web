@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useParams,useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { initializeApp } from "firebase/app";
 import logopng from './logo.png'
 import { Relay, generateSecretKey, getPublicKey } from 'nostr-tools';
@@ -33,30 +33,64 @@ function Detial() {
   const [options, setOptions] = useState(['A', 'B', 'C']);
   const [addr, setAddr] = React.useState('0x1231');
   const [optionsNum, setOptionsNum] = useState(['A', 'B', 'C']);
+  const [selectedOptions, setSelectedOptions] = useState([]);
+  const [choiceValue, setChoiceValue] = useState('single');
+
+
 
 
   useEffect(() => {
     // Init();  firebase 
 
+    
+
     let local_sk = localStorage.getItem('sk')
 
-    if (local_sk == null){
-        navigate("/login");
-    }else{
-        const numberArray = local_sk.split(",").map(Number)
-        // 确保数组长度为32
-        while (numberArray.length < 32) {
-            numberArray.push(0); // 填充0
-        }
-        let sk = numberArray.map(num => num.toString(16).padStart(2, '0')).join('');;
-        console.log('sk', sk)
+    if (local_sk == null) {
+      navigate("/login");
+    } else {
+      const numberArray = local_sk.split(",").map(Number)
+      // 确保数组长度为32
+      while (numberArray.length < 32) {
+        numberArray.push(0); // 填充0
+      }
+      let sk = numberArray.map(num => num.toString(16).padStart(2, '0')).join('');;
+      
 
-        setAddr('0x' + getPublicKey(sk))
+      setAddr('0x' + getPublicKey(sk))
     }
 
+    
+
     InitMetaData()
-   
+
+
   }, []);
+
+
+
+  const handleOptionChange = (event) => {
+    const index = parseInt(event.target.dataset.index);
+    const isChecked = event.target.checked;
+  
+    if (choiceValue == 'multi') {
+      // 多选逻辑
+      if (isChecked) {
+        setSelectedOptions((prevSelectedOptions) => [...prevSelectedOptions, index]);
+      } else {
+        setSelectedOptions((prevSelectedOptions) =>
+          prevSelectedOptions.filter((option) => option !== index)
+        );
+      }
+    } else {
+      // 单选逻辑
+      if (isChecked) {
+        setSelectedOptions([index]);
+      } else {
+        setSelectedOptions([]);
+      }
+    }
+  };
 
 
   async function Init() {
@@ -139,8 +173,8 @@ function Detial() {
           "title": data.tags[0].values[5],
           "info": data.tags[0].values[6]
         })
-        setOptions(data.tags[0].values.slice(7))
-        choiceValue = multipleChoice
+        setOptions(data.tags[0].values.slice(7))     
+        setChoiceValue(multipleChoice)
         // responseCount++; // 响应计数器加一
 
         console.log("responseCount", responseCount)
@@ -164,12 +198,25 @@ function Detial() {
 
 
   async function handleVoteClick() {
+
+    console.log('selectedOptions', selectedOptions); // 在控制台打印选中选项的索引
+
+
+
     const relay = await Relay.connect('wss://zsocialrelay1.nagara.dev');
     console.log(`Connected to ${relay.url}`);
 
     // let's publish a new event while simultaneously monitoring the relay for it
-    let sk = generateSecretKey()
-    let pk = getPublicKey(sk)
+    let local_sk = localStorage.getItem('sk')
+
+    const numberArray = local_sk.split(",").map(Number)
+    // 确保数组长度为32
+    while (numberArray.length < 32) {
+        numberArray.push(0); // 填充0
+    }
+    let sk = numberArray.map(num => num.toString(16).padStart(2, '0')).join('');;
+    console.log('sk', sk)
+    // let pk = getPublicKey(sk)
 
 
     let eventTemplate = {
@@ -178,13 +225,11 @@ function Detial() {
       tags: [
         [
           "e",
-          "47c78ca5e4612cc13aa14c792a96967a4975bfa8ed5e6fcec8b8366f65c4b7b9"
+          id,
         ],
         [
-          "poll_r",
-          "0",
-          "2"
-        ]
+          "poll_r"
+        ].concat(selectedOptions.map(String))
       ],
       content: "",
     }
@@ -267,7 +312,7 @@ function Detial() {
             <h2 className="text-xl font-bold mb-2">Current results</h2>
             <hr className="mb-4" />
             <div className="text-sm">
-   
+
 
               {options.map((option, index) => (
                 <div className="flex justify-between mb-4" key={index}>
@@ -291,13 +336,17 @@ function Detial() {
             <h2 className="text-xl font-bold mb-2">Cast your vote</h2>
             <hr className="mb-4" />
             <div className="text-sm">
+
+
               {options.map((option, index) => (
                 <div className="flex items-center mb-4" key={index}>
                   <input
-                    type={choiceValue === 'multi' ? 'checkbox' : 'radio'} // 根据choiceValue的值选择单选或多选
+                    type={choiceValue == 'multi' ? 'checkbox' : 'radio'} // 根据choiceValue的值选择单选或多选
                     id={`option${index + 1}`}
                     name="voteOption"
                     className="mr-2"
+                    data-index={index} // 存储选项的索引
+                    onChange={handleOptionChange} // 统一的选项改变事件处理函数
                   />
                   <label htmlFor={`option${index + 1}`} className="cursor-pointer">
                     {option}

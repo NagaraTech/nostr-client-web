@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link,useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { Relay, generateSecretKey, getPublicKey } from 'nostr-tools'
 import { finalizeEvent, verifyEvent } from 'nostr-tools'
@@ -14,7 +14,11 @@ function Vote() {
 
     const [searchText, setSearchText] = React.useState("");
     const [InitSearchData, setInitSearchData] = useState([]);
-    const [searchData, setSearchData] = useState([]);
+    const [searchData, setSearchData] = useState({
+        id: 'null',
+        title: 'null',
+        info: 'null'
+    });
     const [addr, setAddr] = React.useState('0x1231');
 
     const navigate = useNavigate();
@@ -23,9 +27,9 @@ function Vote() {
 
         let local_sk = localStorage.getItem('sk')
 
-        if (local_sk == null){
+        if (local_sk == null) {
             navigate("/login");
-        }else{
+        } else {
             const numberArray = local_sk.split(",").map(Number)
             // 确保数组长度为32
             while (numberArray.length < 32) {
@@ -33,13 +37,13 @@ function Vote() {
             }
             let sk = numberArray.map(num => num.toString(16).padStart(2, '0')).join('');;
             console.log('sk', sk)
-    
+
             setAddr('0x' + getPublicKey(sk))
         }
 
         InitEvent();
-        
-        
+
+
 
     }, []);
 
@@ -105,8 +109,6 @@ function Vote() {
         };
 
 
-
-
         socket.onclose = () => {
             console.log('Socket connection closed');
             // 在这里处理连接关闭的逻辑
@@ -114,32 +116,66 @@ function Vote() {
     }
 
 
-    async function SearchEvent() {
+    async function SearchEvent(searchText) {
 
-        const db = getDatabase();
-        const dataRef = ref(db, "vote");
+        var lag = 0;
 
-        onValue(dataRef, (snapshot) => {
-            const data = snapshot.val();
-            // Convert data to desired format
-            const convertedData = Object.keys(data)
-                .filter(key => key === searchText)
-                .map(key => {
-                    const item = data[key];
-                    console.log("options", item.tags[7]);
-                    return {
-                        id: key,
-                        title: item.tags[5],
-                        info: item.tags[6],
-                    };
-                });
+        for (var i in InitSearchData) {
 
-            console.log('searchText is', searchText);
-            setSearchData(convertedData);
-            console.log('convertedData is', convertedData);
+            console.log("InitSearchData[i][0]", InitSearchData[i][0])
+            console.log("searchText", searchText)
+            if (InitSearchData[i][0] == searchText) {
+                setSearchData({
+                    id: InitSearchData[i][0],
+                    title: InitSearchData[i][1],
+                    info: InitSearchData[i][2]
+                })
+                lag = 1;
+
+                // console.log("searchData",searchData, searchData.length)
+            }
+        }
+
+        if (lag == 0) {
+            setSearchData({
+                id: 'null',
+                title: 'null',
+                info: 'null'
+            })
+
+            console.log("searchData", searchData)
+        }
 
 
-        });
+
+
+
+
+
+        // const db = getDatabase();
+        // const dataRef = ref(db, "vote");
+
+        // onValue(dataRef, (snapshot) => {
+        //     const data = snapshot.val();
+        //     // Convert data to desired format
+        //     const convertedData = Object.keys(data)
+        //         .filter(key => key === searchText)
+        //         .map(key => {
+        //             const item = data[key];
+        //             console.log("options", item.tags[7]);
+        //             return {
+        //                 id: key,
+        //                 title: item.tags[5],
+        //                 info: item.tags[6],
+        //             };
+        //         });
+
+        //     console.log('searchText is', searchText);
+        //     setSearchData(convertedData);
+        //     console.log('convertedData is', convertedData);
+
+
+        // });
 
 
         // const socket = new WebSocket('ws://47.129.0.53:8080');
@@ -164,8 +200,6 @@ function Vote() {
 
 
     }
-
-
 
 
     return (<div>
@@ -247,14 +281,16 @@ function Vote() {
                         <p className="text-gray-600 mb-4">Paste a nostr Event ID.</p>
                         <p className="text-gray-600 mb-4">Hashtags are supported, write a # in front of a term to filter by hashtags.</p>
                         <div className="flex items-center mb-4">
-                            <i className="fas fa-search search-icon"></i>
-                            <input
-                                type="text"
-                                placeholder="Event ID"
-                                className="border border-gray-300 p-2 rounded-md w-full search-input ml-2"
-                                value={searchText}
-                                onChange={(e) => setSearchText(e.target.value)}
-                            />
+                            <div className="flex items-center">
+                                <i className="fas fa-search search-icon"></i>
+                                <input
+                                    type="text"
+                                    placeholder="Event ID"
+                                    className="border border-gray-300 p-2 rounded-md search-input ml-2"
+                                    value={searchText}
+                                    onChange={(e) => setSearchText(e.target.value)}
+                                />
+                            </div>
                             <button
                                 className="bg-blue-500 text-white px-4 py-2 rounded-md ml-2"
                                 onClick={() => SearchEvent(searchText)}
@@ -262,22 +298,30 @@ function Vote() {
                                 Search
                             </button>
                         </div>
-                        <div className="flex justify-center items-center h-40">
-                            {searchData.length > 0 ? (
-                                <Link to={`/detail/${searchData[0].id}`} className="bg-white p-4 rounded-md shadow-sm mb-4">
+                        <div >
+                            {searchData.id != 'null' ? (
+                                <Link to={`/detail/${searchData.id}`} className="bg-white p-4 rounded-md shadow-sm mb-8" >
                                     <div className="flex justify-between items-center mb-2">
-                                        <span className="text-sm text-gray-500">{searchData[0].id}</span>
+                                        <span className="text-sm text-gray-500">
+                                            {console.log(searchData)}
+                                            {searchData.id.length > 10 ? `${searchData.id.substring(0, 5)}...${searchData.id.substring(searchData.id.length - 5)}` : searchData.id}
+                                        </span>
+
+
                                         <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">Active</span>
                                     </div>
-                                    <h3 className="text-lg font-semibold">{searchData[0].title}</h3>
-                                    <p className="text-gray-600 text-sm mb-2 line-clamp-2">{searchData[0].info}</p>
+                                    <h3 className="text-lg font-semibold">{searchData.title}</h3>
+                                    <p className="text-gray-600 text-sm mb-2 line-clamp-2">{searchData.info}</p>
                                 </Link>
                             ) : (
-                                <img
-                                    src="https://lf3-static.bytednsdoc.com/obj/eden-cn/bqaeh7vhobd/feedback.svg"
-                                    alt="Placeholder image representing no data available"
-                                    className="opacity-50"
-                                />
+
+                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                    <img
+                                        src="https://lf3-static.bytednsdoc.com/obj/eden-cn/bqaeh7vhobd/feedback.svg"
+                                        alt="Placeholder image representing no data available"
+                                    />
+                                </div>
+
                             )}
                         </div>
                     </div>

@@ -113,7 +113,7 @@ function NewVote() {
 
         if (!multipleChoiceAllowed) {
             setMultipleChoiceAllowed(!multipleChoiceAllowed);
-            choiceValue = 'mult'
+            choiceValue = 'multi'
         } else {
             setMultipleChoiceAllowed(!multipleChoiceAllowed);
             choiceValue = 'single'
