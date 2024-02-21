@@ -20,8 +20,18 @@ function Vote() {
         info: 'null'
     });
     const [addr, setAddr] = React.useState('0x1231');
+    const [showDropdown, setShowDropdown] = useState(false);
+
+    const handleButtonClick = () => {
+        setShowDropdown(!showDropdown);
+    };
 
     const navigate = useNavigate();
+
+    const handleLogoutClick = () => {
+        navigate("/login");
+    };
+  
 
     useEffect(() => {
 
@@ -41,7 +51,14 @@ function Vote() {
             setAddr('0x' + getPublicKey(sk))
         }
 
-        InitEvent();
+        const intervalId = setInterval(() => {
+            InitEvent();
+          }, 4000);
+      
+          // 在组件卸载时清除定时器
+          return () => {
+            clearInterval(intervalId);
+          };
 
 
 
@@ -261,10 +278,29 @@ function Vote() {
 
 
 
-                    <button className="bg-gray-500 rounded-full hover:bg-gray-700 text-white font-bold py-2 px-4 ml-8">
-                        {addr.length > 10 ? `${addr.substring(0, 5)}...${addr.substring(addr.length - 5)}` : addr}
-                    </button>
+                    <div className="relative inline-block">
+                        <button
+                            className={`bg-gray-500 rounded-full hover:bg-gray-700 text-white font-bold py-2 px-4 ml-8 ${showDropdown ? "dropdown-open" : ""
+                                }`}
+                            onClick={handleButtonClick}
+                        >
+                            {addr.length > 10
+                                ? `${addr.substring(0, 5)}...${addr.substring(addr.length - 5)}`
+                                : addr}
+                        </button>
 
+                        {showDropdown && (
+                            <div className="absolute mt-2 w-48 bg-gray-500 rounded-md shadow-lg overflow-hidden">
+                                {/* 下拉选择的内容 */}
+                                <ul className="py-2">
+                                    <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer text-white"
+                                    onClick={handleLogoutClick}
+                                    >Logout</li>
+                                    {/* 其他选项 */}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
 
 
                 </div>
@@ -331,7 +367,7 @@ function Vote() {
                     <div className="mt-8">
                         <h2 className="text-2xl font-semibold mb-4">Proposals</h2>
 
-                        {InitSearchData.map((item) => (
+                        {InitSearchData.slice().reverse().map((item) => (
                             <Link to={`/detail/${item[0]}`}>
                                 <div className="bg-white p-4 rounded-md shadow-sm mb-4" key={item[0]}>
                                     <div className="flex justify-between items-center mb-2">
@@ -345,7 +381,7 @@ function Vote() {
 
                         ))}
 
-                        <Link to="/detail">
+                        {/* <Link to="/detail">
                             <div className="bg-white p-4 rounded-md shadow-sm mb-4">
                                 <div className="flex justify-between items-center mb-2">
                                     <span className="text-sm text-gray-500">id</span>
@@ -361,11 +397,11 @@ function Vote() {
                                 <span className="text-sm text-gray-500">Ends in 5 days</span>
                             </div>
 
-                        </Link>
+                        </Link> */}
 
 
 
-                        <div className="bg-white p-4 rounded-md shadow-sm">
+                        {/* <div className="bg-white p-4 rounded-md shadow-sm">
                             <div className="flex justify-between items-center mb-2">
                                 <span className="text-sm text-gray-500">@DK (Premia)</span>
                                 <span className="text-sm bg-red-100 text-red-800 px-2 py-1 rounded-full">Closed</span>
@@ -377,7 +413,7 @@ function Vote() {
 
 
                             <span className="text-sm text-gray-500">Ended 15 hours ago</span>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
             </div>

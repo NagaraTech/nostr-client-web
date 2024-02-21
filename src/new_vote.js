@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect ,useState} from 'react';
 import { Link,useNavigate } from 'react-router-dom';
 // import { FontAwesomeIcon } from './logo.png';
 // import { faMinus } from './logo.png';
@@ -27,8 +27,16 @@ function NewVote() {
     const [endTime, setEndTime] = React.useState('');
     const [options, setOptions] = React.useState(['Yes', 'No']);
     const [addr, setAddr] = React.useState('0x1231');
+    const [showDropdown, setShowDropdown] = useState(false);
 
+    const handleButtonClick = () => {
+        setShowDropdown(!showDropdown);
+    };
 
+    const handleLogoutClick = () => {
+        navigate("/login");
+    };
+  
 
     useEffect(() => {
         let local_sk = localStorage.getItem('sk')
@@ -259,9 +267,28 @@ function NewVote() {
                         {/* <button> <Link to="/newvote"> New vote </Link></button> */}
 
 
-                        <button className="bg-gray-500 rounded-full hover:bg-gray-700 text-white font-bold py-2 px-4 ml-8">
-                            {addr.length > 10 ? `${addr.substring(0, 5)}...${addr.substring(addr.length - 5)}` : addr}
+                        <div className="relative inline-block">
+                        <button
+                            className={`bg-gray-500 rounded-full hover:bg-gray-700 text-white font-bold py-2 px-4 ml-8 ${showDropdown ? "dropdown-open" : ""
+                                }`}
+                            onClick={handleButtonClick}
+                        >
+                            {addr.length > 10
+                                ? `${addr.substring(0, 5)}...${addr.substring(addr.length - 5)}`
+                                : addr}
                         </button>
+
+                        {showDropdown && (
+                            <div className="absolute mt-2 w-48 bg-gray-500 rounded-md shadow-lg overflow-hidden">
+                                {/* 下拉选择的内容 */}
+                                <ul className="py-2">
+                                    <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer text-white"
+                                    onClick={handleLogoutClick}>Logout</li>
+                                    {/* 其他选项 */}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
 
                     </div>
 
@@ -320,7 +347,7 @@ function NewVote() {
                             </div>
                         </div>
 
-                        <div className="mb-6">
+                        {/* <div className="mb-6">
                             <label className="block text-gray-700 text-sm font-bold mb-2">
                                 Relay
                             </label>
@@ -335,7 +362,7 @@ function NewVote() {
                                     <i className="fas fa-chevron-down"></i>
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
 
 
 

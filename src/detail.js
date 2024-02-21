@@ -8,10 +8,11 @@ import { Relay, generateSecretKey, getPublicKey } from 'nostr-tools';
 import { finalizeEvent } from 'nostr-tools';
 
 import { getDatabase, ref, push, set, onValue } from "firebase/database";
+import CopyToClipboard from "react-copy-to-clipboard";
 
 
 
-let choiceValue = 'single'
+
 
 function Detial() {
 
@@ -32,17 +33,50 @@ function Detial() {
   const [endDate, setEndDate] = useState('Feb 6, 2024, 1:17 AM');
   const [options, setOptions] = useState(['A', 'B', 'C']);
   const [addr, setAddr] = React.useState('0x1231');
-  const [optionsNum, setOptionsNum] = useState(['A', 'B', 'C']);
+  const [optionsNum, setOptionsNum] = useState([0, 0, 0]);
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [choiceValue, setChoiceValue] = useState('single');
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [voted, setVoted] = useState(false);
+
+  const [showCopiedMessage, setShowCopiedMessage] = useState(false);
 
 
+  const handleButtonClick = () => {
+    setShowDropdown(!showDropdown);
+  };
+
+  const handleLogoutClick = () => {
+    navigate("/login");
+};
+
+
+  const copiedMessageStyles = {
+    position: "fixed",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    backgroundColor: "#f3f4f6",
+    padding: "0.5rem 1rem",
+    borderRadius: "0.25rem",
+    color: "#1f2937",
+  };
+
+  const handleCopy = () => {
+    // 复制成功后的处理
+    setShowCopiedMessage(true);
+    console.log("VoteId copied successfully!");
+     // 3 秒后隐藏弹窗
+     setTimeout(() => {
+      setShowCopiedMessage(false);
+    }, 500);
+  };
 
 
   useEffect(() => {
     // Init();  firebase 
 
-    
+
 
     let local_sk = localStorage.getItem('sk')
 
@@ -55,12 +89,12 @@ function Detial() {
         numberArray.push(0); // 填充0
       }
       let sk = numberArray.map(num => num.toString(16).padStart(2, '0')).join('');;
-      
+
 
       setAddr('0x' + getPublicKey(sk))
     }
 
-    
+
 
     InitMetaData()
 
@@ -72,7 +106,7 @@ function Detial() {
   const handleOptionChange = (event) => {
     const index = parseInt(event.target.dataset.index);
     const isChecked = event.target.checked;
-  
+
     if (choiceValue == 'multi') {
       // 多选逻辑
       if (isChecked) {
@@ -173,7 +207,7 @@ function Detial() {
           "title": data.tags[0].values[5],
           "info": data.tags[0].values[6]
         })
-        setOptions(data.tags[0].values.slice(7))     
+        setOptions(data.tags[0].values.slice(7))
         setChoiceValue(multipleChoice)
         // responseCount++; // 响应计数器加一
 
@@ -201,6 +235,12 @@ function Detial() {
 
     console.log('selectedOptions', selectedOptions); // 在控制台打印选中选项的索引
 
+    let num = optionsNum;
+    for(var i in selectedOptions){
+      num[selectedOptions[i]] = Number(num[selectedOptions[i]])  + 1
+    }
+
+   
 
 
     const relay = await Relay.connect('wss://zsocialrelay1.nagara.dev');
@@ -212,7 +252,7 @@ function Detial() {
     const numberArray = local_sk.split(",").map(Number)
     // 确保数组长度为32
     while (numberArray.length < 32) {
-        numberArray.push(0); // 填充0
+      numberArray.push(0); // 填充0
     }
     let sk = numberArray.map(num => num.toString(16).padStart(2, '0')).join('');;
     console.log('sk', sk)
@@ -240,6 +280,8 @@ function Detial() {
 
     console.log("signedEvent", signedEvent)
     await relay.publish(signedEvent)
+    setVoted(true);
+    setOptionsNum(num)
     console.log("write result")
     relay.close()
   }
@@ -269,9 +311,29 @@ function Detial() {
         <Link to="/">  <a>
           <img src={logopng} alt="Logo" className="h-8" ></img>
         </a></Link>
-        <button className="bg-gray-500 rounded-full hover:bg-gray-700 text-white font-bold py-2 px-4 ml-8">
-          {addr.length > 10 ? `${addr.substring(0, 5)}...${addr.substring(addr.length - 5)}` : addr}
-        </button>
+        <div className="relative inline-block">
+          <button
+            className={`bg-gray-500 rounded-full hover:bg-gray-700 text-white font-bold py-2 px-4 ml-8 ${showDropdown ? "dropdown-open" : ""
+              }`}
+            onClick={handleButtonClick}
+          >
+            {addr.length > 10
+              ? `${addr.substring(0, 5)}...${addr.substring(addr.length - 5)}`
+              : addr}
+          </button>
+
+          {showDropdown && (
+            <div className="absolute mt-2 w-48 bg-gray-500 rounded-md shadow-lg overflow-hidden">
+              {/* 下拉选择的内容 */}
+              <ul className="py-2">
+                <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer text-white"
+                onClick={handleLogoutClick}
+                >Logout</li>
+                {/* 其他选项 */}
+              </ul>
+            </div>
+          )}
+        </div>
       </header>
       <main className="flex gap-4">
         <section className="w-2/3 p-4 bg-white shadow rounded">
@@ -287,12 +349,23 @@ function Detial() {
             <h2 className="text-xl font-bold mb-2">Information</h2>
             <hr className="mb-4" />
             <div className="text-sm">
-              <div className="flex justify-between mb-2">
-                <span className="font-bold">VoteId</span>
-                <span>
-                  {voteId.length > 10 ? `${voteId.substring(0, 5)}...${voteId.substring(addr.length - 5)}` : voteId}
-                </span>
-              </div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "2rem" }}>
+      <span style={{ fontWeight: "bold" }}>VoteId</span>
+      <span>
+        {voteId.length > 10 ? `${voteId.substring(0, 5)}...${voteId.substring(voteId.length - 5)}` : voteId}
+        <CopyToClipboard text={voteId} onCopy={handleCopy}>
+          <button style={{ marginLeft: "0.5rem", color: "#0053ba", cursor: "pointer", outline: "none" }}>
+            Copy
+          </button>
+        </CopyToClipboard>
+      </span>
+
+      {showCopiedMessage && (
+        <div style={copiedMessageStyles}>
+          <span>已复制 ID</span>
+        </div>
+      )}
+    </div>
               <div className="flex justify-between mb-2">
                 <span className="font-bold">Multiple Choice</span>
                 <span>{multipleChoice}</span>
@@ -353,12 +426,16 @@ function Detial() {
                   </label>
                 </div>
               ))}
-              <button
-                className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                onClick={handleVoteClick}
-              >
-                Vote
-              </button>
+              <div>
+                <button
+                  className={`w-full ${voted ? "bg-gray-500 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-700"
+                    } text-white font-bold py-2 px-4 rounded`}
+                  onClick={handleVoteClick}
+                  disabled={voted}
+                >
+                  {voted ? "Already Voted" : "Vote"}
+                </button>
+              </div>
             </div>
           </div>
         </aside>
