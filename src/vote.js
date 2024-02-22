@@ -6,7 +6,7 @@ import { finalizeEvent, verifyEvent } from 'nostr-tools'
 
 import Login from './login';
 import { initializeApp } from "firebase/app";
-
+import "./LoadingPage.css"; // 导入样式文件
 import { getDatabase, ref, push, set, onValue } from "firebase/database";
 
 
@@ -21,7 +21,7 @@ function Vote() {
     });
     const [addr, setAddr] = React.useState('0x1231');
     const [showDropdown, setShowDropdown] = useState(false);
-
+    const [isLoading, setIsLoading] = useState(true);
     const handleButtonClick = () => {
         setShowDropdown(!showDropdown);
     };
@@ -31,7 +31,7 @@ function Vote() {
     const handleLogoutClick = () => {
         navigate("/login");
     };
-  
+
 
     useEffect(() => {
 
@@ -53,12 +53,12 @@ function Vote() {
 
         const intervalId = setInterval(() => {
             InitEvent();
-          }, 4000);
-      
-          // 在组件卸载时清除定时器
-          return () => {
+        }, 4000);
+
+        // 在组件卸载时清除定时器
+        return () => {
             clearInterval(intervalId);
-          };
+        };
 
 
 
@@ -122,6 +122,7 @@ function Vote() {
             const data = JSON.parse(event.data);
             setInitSearchData(data);
             console.log('Received data:', data);
+            setIsLoading(false)
 
         };
 
@@ -260,128 +261,145 @@ function Vote() {
             </style>
         </head>
 
-        <div className="container mx-auto px-4 py-8">
 
-
-
-            <header className="flex justify-between items-center mb-8 p-4 bg-white shadow rounded">
-
-                <Link to="/">  <a>
-                    <img src="./logo.png" alt="Logo" className="h-8" ></img>
-                </a></Link>
-
-                <div className="flex justify-end">
-
-
-                    <button> <Link to="/newvote"> New vote </Link></button>
-
-
-
-
-                    <div className="relative inline-block">
-                        <button
-                            className={`bg-gray-500 rounded-full hover:bg-gray-700 text-white font-bold py-2 px-4 ml-8 ${showDropdown ? "dropdown-open" : ""
-                                }`}
-                            onClick={handleButtonClick}
-                        >
-                            {addr.length > 10
-                                ? `${addr.substring(0, 5)}...${addr.substring(addr.length - 5)}`
-                                : addr}
-                        </button>
-
-                        {showDropdown && (
-                            <div className="absolute mt-2 w-48 bg-gray-500 rounded-md shadow-lg overflow-hidden">
-                                {/* 下拉选择的内容 */}
-                                <ul className="py-2">
-                                    <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer text-white"
-                                    onClick={handleLogoutClick}
-                                    >Logout</li>
-                                    {/* 其他选项 */}
-                                </ul>
-                            </div>
-                        )}
+        <div>
+            {isLoading ? (
+                <div className="loading-page-container">
+                    <div className="initial-animation"></div>
+                    <div className="loading-page">
+                        <div className="circle1"></div>
+                        <div className="circle2"></div>
+                        <div className="circle3"></div>
+                        <div className="circle4"></div>
+                        <div className="circle5"></div>
+                        <div className="circle6"></div>
+                        <div className="circle7"></div>
+                        <div className="circle8"></div>
                     </div>
-
-
                 </div>
+            ) : (
+                <div className="container mx-auto px-4 py-8">
 
-            </header>
+
+
+                    <header className="flex justify-between items-center mb-8 p-4 bg-white shadow rounded">
+
+                        <Link to="/">  <a>
+                            <img src="./logo.png" alt="Logo" className="h-8" ></img>
+                        </a></Link>
+
+                        <div className="flex justify-end">
+
+
+                            <button> <Link to="/newvote"> New vote </Link></button>
 
 
 
-            <div class="mx-auto w-3/5">
 
-                <div className="p-4">
-                    <div className="bg-white p-4 rounded-md shadow-sm relative">
-                        <h2 className="text-xl font-semibold mb-4">Search</h2>
-                        <p className="text-gray-600 mb-4">Paste a nostr Event ID.</p>
-                        <p className="text-gray-600 mb-4">Hashtags are supported, write a # in front of a term to filter by hashtags.</p>
-                        <div className="flex items-center mb-4">
-                            <div className="flex items-center">
-                                <i className="fas fa-search search-icon"></i>
-                                <input
-                                    type="text"
-                                    placeholder="Event ID"
-                                    className="border border-gray-300 p-2 rounded-md search-input ml-2"
-                                    value={searchText}
-                                    onChange={(e) => setSearchText(e.target.value)}
-                                />
+                            <div className="relative inline-block">
+                                <button
+                                    className={`bg-gray-500 rounded-full hover:bg-gray-700 text-white font-bold py-2 px-4 ml-8 ${showDropdown ? "dropdown-open" : ""
+                                        }`}
+                                    onClick={handleButtonClick}
+                                >
+                                    {addr.length > 10
+                                        ? `${addr.substring(0, 5)}...${addr.substring(addr.length - 5)}`
+                                        : addr}
+                                </button>
+
+                                {showDropdown && (
+                                    <div className="absolute mt-2 w-48 bg-gray-500 rounded-md shadow-lg overflow-hidden">
+                                        {/* 下拉选择的内容 */}
+                                        <ul className="py-2">
+                                            <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer text-white"
+                                                onClick={handleLogoutClick}
+                                            >Logout</li>
+                                            {/* 其他选项 */}
+                                        </ul>
+                                    </div>
+                                )}
                             </div>
-                            <button
-                                className="bg-blue-500 text-white px-4 py-2 rounded-md ml-2"
-                                onClick={() => SearchEvent(searchText)}
-                            >
-                                Search
-                            </button>
+
+
                         </div>
-                        <div >
-                            {searchData.id != 'null' ? (
-                                <Link to={`/detail/${searchData.id}`} className="bg-white p-4 rounded-md shadow-sm mb-8" >
-                                    <div className="flex justify-between items-center mb-2">
-                                        <span className="text-sm text-gray-500">
-                                            {console.log(searchData)}
-                                            {searchData.id.length > 10 ? `${searchData.id.substring(0, 5)}...${searchData.id.substring(searchData.id.length - 5)}` : searchData.id}
-                                        </span>
+
+                    </header>
 
 
-                                        <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">Active</span>
+
+                    <div class="mx-auto w-3/5">
+
+                        <div className="p-4">
+                            <div className="bg-white p-4 rounded-md shadow-sm relative">
+                                <h2 className="text-xl font-semibold mb-4">Search</h2>
+                                <p className="text-gray-600 mb-4">Paste a nostr vote id.</p>
+                                <p className="text-gray-600 mb-4">vote id are supported, write  a filter by vote id.</p>
+                                <div className="flex justify-between items-center mb-4">
+                                    <div className="flex items-center flex-grow">
+                                        <i className="fas fa-search search-icon"></i>
+                                        <input
+                                            type="text"
+                                            placeholder="Search Vote ID"
+                                            className="border border-gray-300 p-2 rounded-md search-input ml-2 mr-2 w-full" // 添加 w-full 类名
+                                            value={searchText}
+                                            onChange={(e) => setSearchText(e.target.value)}
+                                        />
                                     </div>
-                                    <h3 className="text-lg font-semibold">{searchData.title}</h3>
-                                    <p className="text-gray-600 text-sm mb-2 line-clamp-2">{searchData.info}</p>
-                                </Link>
-                            ) : (
-
-                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                    <img
-                                        src="https://lf3-static.bytednsdoc.com/obj/eden-cn/bqaeh7vhobd/feedback.svg"
-                                        alt="Placeholder image representing no data available"
-                                    />
+                                    <button
+                                        className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                                        onClick={() => SearchEvent(searchText)}
+                                    >
+                                        Search
+                                    </button>
                                 </div>
+                                <div >
+                                    {searchData.id != 'null' ? (
+                                        <Link to={`/detail/${searchData.id}`} className="bg-white p-4 rounded-md shadow-sm mb-8" >
+                                            <div className="flex justify-between items-center mb-2">
+                                                <span className="text-sm text-gray-500">
+                                                    {console.log(searchData)}
+                                                    {searchData.id.length > 10 ? `${searchData.id.substring(0, 5)}...${searchData.id.substring(searchData.id.length - 5)}` : searchData.id}
+                                                </span>
 
-                            )}
-                        </div>
-                    </div>
 
+                                                <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">Active</span>
+                                            </div>
+                                            <h3 className="text-lg font-semibold">{searchData.title}</h3>
+                                            <p className="text-gray-600 text-sm mb-2 line-clamp-2">{searchData.info}</p>
+                                        </Link>
+                                    ) : (
 
+                                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                            <img
+                                                src="https://lf3-static.bytednsdoc.com/obj/eden-cn/bqaeh7vhobd/feedback.svg"
+                                                alt="Placeholder image representing no data available"
+                                            />
+                                        </div>
 
-                    <div className="mt-8">
-                        <h2 className="text-2xl font-semibold mb-4">Proposals</h2>
-
-                        {InitSearchData.slice().reverse().map((item) => (
-                            <Link to={`/detail/${item[0]}`}>
-                                <div className="bg-white p-4 rounded-md shadow-sm mb-4" key={item[0]}>
-                                    <div className="flex justify-between items-center mb-2">
-                                        <span className="text-sm text-gray-500">      {item[0].length > 10 ? `${item[0].substring(0, 5)}...${item[0].substring(item[0].length - 5)}` : item[0]}  </span>
-                                        <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">Active</span>
-                                    </div>
-                                    <h3 className="text-lg font-semibold">{item[1]}</h3>
-                                    <p className="text-gray-600 text-sm mb-2 line-clamp-2">{item[2]}</p>
+                                    )}
                                 </div>
-                            </Link>
+                            </div>
 
-                        ))}
 
-                        {/* <Link to="/detail">
+
+                            <div className="mt-8">
+                                <h2 className="text-2xl font-semibold mb-4">Proposals</h2>
+
+                                {InitSearchData.slice().reverse().map((item) => (
+                                    <Link to={`/detail/${item[0]}`}>
+                                        <div className="bg-white p-4 rounded-md shadow-sm mb-4" key={item[0]}>
+                                            <div className="flex justify-between items-center mb-2">
+                                                <span className="text-sm text-gray-500">      {item[0].length > 10 ? `${item[0].substring(0, 5)}...${item[0].substring(item[0].length - 5)}` : item[0]}  </span>
+                                                <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">Active</span>
+                                            </div>
+                                            <h3 className="text-lg font-semibold">{item[1]}</h3>
+                                            <p className="text-gray-600 text-sm mb-2 line-clamp-2">{item[2]}</p>
+                                        </div>
+                                    </Link>
+
+                                ))}
+
+                                {/* <Link to="/detail">
                             <div className="bg-white p-4 rounded-md shadow-sm mb-4">
                                 <div className="flex justify-between items-center mb-2">
                                     <span className="text-sm text-gray-500">id</span>
@@ -401,7 +419,7 @@ function Vote() {
 
 
 
-                        {/* <div className="bg-white p-4 rounded-md shadow-sm">
+                                {/* <div className="bg-white p-4 rounded-md shadow-sm">
                             <div className="flex justify-between items-center mb-2">
                                 <span className="text-sm text-gray-500">@DK (Premia)</span>
                                 <span className="text-sm bg-red-100 text-red-800 px-2 py-1 rounded-full">Closed</span>
@@ -414,13 +432,18 @@ function Vote() {
 
                             <span className="text-sm text-gray-500">Ended 15 hours ago</span>
                         </div> */}
+                            </div>
+                        </div>
                     </div>
+
+
+
                 </div>
-            </div>
-
-
+            )}
 
         </div>
+
+
 
         {/* <Link to="/page2">Go to Page 2</Link> */}
     </div>)
