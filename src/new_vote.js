@@ -1,14 +1,10 @@
 
 import React, { useEffect ,useState} from 'react';
 import { Link,useNavigate } from 'react-router-dom';
-// import { FontAwesomeIcon } from './logo.png';
-// import { faMinus } from './logo.png';
+
 import { Relay, generateSecretKey, getPublicKey } from 'nostr-tools';
 import { finalizeEvent } from 'nostr-tools';
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
 
-import { getDatabase, ref, push, set, onValue } from "firebase/database";
 
 
 
@@ -45,9 +41,9 @@ function NewVote() {
             navigate("/login");
         }else{
             const numberArray = local_sk.split(",").map(Number)
-            // 确保数组长度为32
+        
             while (numberArray.length < 32) {
-                numberArray.push(0); // 填充0
+                numberArray.push(0); //
             }
             let sk = numberArray.map(num => num.toString(16).padStart(2, '0')).join('');;
             console.log('sk', sk)
@@ -56,24 +52,7 @@ function NewVote() {
         }
     });
 
-    /**
-     * firebase part
-     */
-    const firebaseConfig = {
-        apiKey: "AIzaSyCgRzMHIfhPZnIXedgNuqqoyQz5sausEu8",
-        authDomain: "vote-2b9d8.firebaseapp.com",
-        projectId: "vote-2b9d8",
-        storageBucket: "vote-2b9d8.appspot.com",
-        messagingSenderId: "1050103509183",
-        appId: "1:1050103509183:web:15565360fa1d58fe96560a",
-        measurementId: "G-NZXRF34DPT",
-        databaseURL: "https://vote-2b9d8-default-rtdb.asia-southeast1.firebasedatabase.app/"
-    };
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    // Initialize Realtime Database and get a reference tco the service
-    const database = getDatabase(app);
 
 
 
@@ -133,7 +112,7 @@ function NewVote() {
     };
 
     const handlePublish = () => {
-        // 访问收集的数据
+           
         console.log('Title:', title);
         console.log('Content:', content);
         console.log('Start Time:', startTime);
@@ -151,25 +130,13 @@ function NewVote() {
         };
 
 
-
         connectAndSubscribe(jsonData);
 
-
-        // 执行其他操作...
-
-        // 可以使用 react-router-dom 进行路由导航
     };
 
 
     async function connectAndSubscribe(jsonData) {
 
-
-
-        console.log("jsonData", jsonData)
-
-
-        const db = getDatabase();
-        const dataRef = ref(db, "vote");
 
         const newData = {
             kind: 301,
@@ -180,22 +147,7 @@ function NewVote() {
 
         console.log("new Datais ", newData);
 
-        try {
-            const newChildRef = push(dataRef);
-            await set(newChildRef, newData);
-            console.log("Data added with key: ", newChildRef.key);
-        } catch (error) {
-            console.error("Error adding data: ", error);
-        }
-
-        console.log("Storage in firebase", jsonData)
-
-        onValue(dataRef, (snapshot) => {
-            const data = snapshot.val();
-            console.log("Data from Firebase:", data);
-        });
-
-        //
+      
 
 
 
@@ -206,9 +158,9 @@ function NewVote() {
         let local_sk = localStorage.getItem('sk')
 
         const numberArray = local_sk.split(",").map(Number)
-        // 确保数组长度为32
+
         while (numberArray.length < 32) {
-            numberArray.push(0); // 填充0
+            numberArray.push(0); 
         }
         let sk = numberArray.map(num => num.toString(16).padStart(2, '0')).join('');;
         console.log('sk', sk)
@@ -281,11 +233,11 @@ function NewVote() {
 
                         {showDropdown && (
                             <div className="absolute mt-2 w-48 bg-gray-500 rounded-md shadow-lg overflow-hidden">
-                                {/* 下拉选择的内容 */}
+    
                                 <ul className="py-2">
                                     <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer text-white"
                                     onClick={handleLogoutClick}>Logout</li>
-                                    {/* 其他选项 */}
+                       
                                 </ul>
                             </div>
                         )}

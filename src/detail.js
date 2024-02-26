@@ -63,10 +63,9 @@ function Detial() {
   };
 
   const handleCopy = () => {
-    // 复制成功后的处理
+
     setShowCopiedMessage(true);
     console.log("VoteId copied successfully!");
-     // 3 秒后隐藏弹窗
      setTimeout(() => {
       setShowCopiedMessage(false);
     }, 500);
@@ -74,7 +73,7 @@ function Detial() {
 
 
   useEffect(() => {
-    // Init();  firebase 
+
 
 
 
@@ -84,9 +83,9 @@ function Detial() {
       navigate("/login");
     } else {
       const numberArray = local_sk.split(",").map(Number)
-      // 确保数组长度为32
+
       while (numberArray.length < 32) {
-        numberArray.push(0); // 填充0
+        numberArray.push(0); 
       }
       let sk = numberArray.map(num => num.toString(16).padStart(2, '0')).join('');;
 
@@ -108,7 +107,7 @@ function Detial() {
     const isChecked = event.target.checked;
 
     if (choiceValue == 'multi') {
-      // 多选逻辑
+      // multi choice
       if (isChecked) {
         setSelectedOptions((prevSelectedOptions) => [...prevSelectedOptions, index]);
       } else {
@@ -117,7 +116,7 @@ function Detial() {
         );
       }
     } else {
-      // 单选逻辑
+      // single choice
       if (isChecked) {
         setSelectedOptions([index]);
       } else {
@@ -127,58 +126,6 @@ function Detial() {
   };
 
 
-  async function Init() {
-
-
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCgRzMHIfhPZnIXedgNuqqoyQz5sausEu8",
-      authDomain: "vote-2b9d8.firebaseapp.com",
-      projectId: "vote-2b9d8",
-      storageBucket: "vote-2b9d8.appspot.com",
-      messagingSenderId: "1050103509183",
-      appId: "1:1050103509183:web:15565360fa1d58fe96560a",
-      measurementId: "G-NZXRF34DPT",
-      databaseURL: "https://vote-2b9d8-default-rtdb.asia-southeast1.firebasedatabase.app/"
-    };
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    // Initialize Realtime Database and get a reference tco the service
-    const database = getDatabase(app);
-
-    const db = getDatabase();
-    const dataRef = ref(db, "vote");
-
-    onValue(dataRef, (snapshot) => {
-      const data = snapshot.val();
-      // Convert data to desired format
-      const convertedData = Object.keys(data)
-        .filter(key => key === id)
-        .map(key => {
-          const item = data[key];
-          console.log("options", item.tags[7]);
-          return {
-            id: key,
-            title: item.tags[5],
-            info: item.tags[6],
-            startdate: item.tags[3],
-            enddate: item.tags[4],
-            multipleChoiceAllowed: item.tags[1],
-            options: item.tags[7]
-
-          };
-        });
-      setInitSearchData(convertedData);
-      setVoteId(convertedData[0].id);
-      setMultipleChoice(convertedData[0].multipleChoiceAllowed);
-      setStartDate(convertedData[0].startdate);
-      setEndDate(convertedData[0].enddate);
-      setOptions(convertedData[0].options);
-      console.log("options", options);
-      console.log("Data from Firebase:", data);
-    });
-  }
 
   async function InitMetaData() {
     const socket = new WebSocket('wss://zsocialrelay1.nagara.dev');
@@ -233,7 +180,6 @@ function Detial() {
 
   async function handleVoteClick() {
 
-    console.log('selectedOptions', selectedOptions); // 在控制台打印选中选项的索引
 
     let num = optionsNum;
     for(var i in selectedOptions){
@@ -250,9 +196,9 @@ function Detial() {
     let local_sk = localStorage.getItem('sk')
 
     const numberArray = local_sk.split(",").map(Number)
-    // 确保数组长度为32
+
     while (numberArray.length < 32) {
-      numberArray.push(0); // 填充0
+      numberArray.push(0); // 
     }
     let sk = numberArray.map(num => num.toString(16).padStart(2, '0')).join('');;
     console.log('sk', sk)
@@ -325,12 +271,12 @@ function Detial() {
 
           {showDropdown && (
             <div className="absolute mt-2 w-48 bg-gray-500 rounded-md shadow-lg overflow-hidden">
-              {/* 下拉选择的内容 */}
+       
               <ul className="py-2">
                 <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer text-white"
                 onClick={handleLogoutClick}
                 >Logout</li>
-                {/* 其他选项 */}
+ 
               </ul>
             </div>
           )}
@@ -363,7 +309,7 @@ function Detial() {
 
       {showCopiedMessage && (
         <div style={copiedMessageStyles}>
-          <span>已复制 ID</span>
+          <span>Copy ID</span>
         </div>
       )}
     </div>
@@ -415,12 +361,12 @@ function Detial() {
               {options.map((option, index) => (
                 <div className="flex items-center mb-4" key={index}>
                   <input
-                    type={choiceValue == 'multi' ? 'checkbox' : 'radio'} // 根据choiceValue的值选择单选或多选
+                    type={choiceValue == 'multi' ? 'checkbox' : 'radio'} //
                     id={`option${index + 1}`}
                     name="voteOption"
                     className="mr-2"
-                    data-index={index} // 存储选项的索引
-                    onChange={handleOptionChange} // 统一的选项改变事件处理函数
+                    data-index={index} // 
+                    onChange={handleOptionChange} // 
                   />
                   <label htmlFor={`option${index + 1}`} className="cursor-pointer">
                     {option}

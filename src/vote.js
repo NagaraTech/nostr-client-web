@@ -4,10 +4,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Relay, generateSecretKey, getPublicKey } from 'nostr-tools'
 import { finalizeEvent, verifyEvent } from 'nostr-tools'
 
-import Login from './login';
-import { initializeApp } from "firebase/app";
-import "./LoadingPage.css"; // 导入样式文件
-import { getDatabase, ref, push, set, onValue } from "firebase/database";
+// import Login from './login';
+
+import "./LoadingPage.css";
+
 
 
 function Vote() {
@@ -41,9 +41,9 @@ function Vote() {
             navigate("/login");
         } else {
             const numberArray = local_sk.split(",").map(Number)
-            // 确保数组长度为32
+            // make sure array equal to 32
             while (numberArray.length < 32) {
-                numberArray.push(0); // 填充0
+                numberArray.push(0); // 0
             }
             let sk = numberArray.map(num => num.toString(16).padStart(2, '0')).join('');;
             console.log('sk', sk)
@@ -55,7 +55,7 @@ function Vote() {
             InitEvent();
         }, 4000);
 
-        // 在组件卸载时清除定时器
+        // clean timer
         return () => {
             clearInterval(intervalId);
         };
@@ -68,44 +68,6 @@ function Vote() {
 
     async function InitEvent() {
 
-
-
-
-        // const firebaseConfig = {
-        //     apiKey: "AIzaSyCgRzMHIfhPZnIXedgNuqqoyQz5sausEu8",
-        //     authDomain: "vote-2b9d8.firebaseapp.com",
-        //     projectId: "vote-2b9d8",
-        //     storageBucket: "vote-2b9d8.appspot.com",
-        //     messagingSenderId: "1050103509183",
-        //     appId: "1:1050103509183:web:15565360fa1d58fe96560a",
-        //     measurementId: "G-NZXRF34DPT",
-        //     databaseURL: "https://vote-2b9d8-default-rtdb.asia-southeast1.firebasedatabase.app/"
-        // };
-
-        // // Initialize Firebase
-        // const app = initializeApp(firebaseConfig);
-        // // Initialize Realtime Database and get a reference tco the service
-        // const database = getDatabase(app);
-
-        // const db = getDatabase();
-        // const dataRef = ref(db, "vote");
-
-        // onValue(dataRef, (snapshot) => {
-        //     const data = snapshot.val();
-        //     // Convert data to desired format
-        //     const convertedData = Object.keys(data).map((key) => {
-        //         const item = data[key];
-        //         return {
-        //             id: key,
-        //             title: item.tags[5],
-        //             info: item.tags[6]
-        //         };
-        //     });
-
-        //     console.log(convertedData);
-        //     // setInitSearchData(convertedData);
-        //     console.log("Data from Firebase:", data);
-        // });
 
 
 
@@ -129,7 +91,7 @@ function Vote() {
 
         socket.onclose = () => {
             console.log('Socket connection closed');
-            // 在这里处理连接关闭的逻辑
+
         };
     }
 
@@ -163,59 +125,6 @@ function Vote() {
 
             console.log("searchData", searchData)
         }
-
-
-
-
-
-
-
-        // const db = getDatabase();
-        // const dataRef = ref(db, "vote");
-
-        // onValue(dataRef, (snapshot) => {
-        //     const data = snapshot.val();
-        //     // Convert data to desired format
-        //     const convertedData = Object.keys(data)
-        //         .filter(key => key === searchText)
-        //         .map(key => {
-        //             const item = data[key];
-        //             console.log("options", item.tags[7]);
-        //             return {
-        //                 id: key,
-        //                 title: item.tags[5],
-        //                 info: item.tags[6],
-        //             };
-        //         });
-
-        //     console.log('searchText is', searchText);
-        //     setSearchData(convertedData);
-        //     console.log('convertedData is', convertedData);
-
-
-        // });
-
-
-        // const socket = new WebSocket('ws://47.129.0.53:8080');
-        // console.log('searchText is', searchText);
-        // // RelayServer.send('["QUERY_SID"]'); 
-        // socket.onopen = () => {
-        //     const message = JSON.stringify(["QUERY", searchText]);
-        //     socket.send(message);
-        // };
-
-        // socket.onmessage = (event) => {
-        //     const data = JSON.parse(event.data);
-        //     setSearchData(data);
-        //     console.log('Received data:', data);
-        //     // 在这里处理接收到的数据
-        // };
-
-        // socket.onclose = () => {
-        //     console.log('Socket connection closed');
-        //     // 在这里处理连接关闭的逻辑
-        // };
-
 
     }
 
@@ -309,12 +218,12 @@ function Vote() {
 
                                 {showDropdown && (
                                     <div className="absolute mt-2 w-48 bg-gray-500 rounded-md shadow-lg overflow-hidden">
-                                        {/* 下拉选择的内容 */}
+
                                         <ul className="py-2">
                                             <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer text-white"
                                                 onClick={handleLogoutClick}
                                             >Logout</li>
-                                            {/* 其他选项 */}
+
                                         </ul>
                                     </div>
                                 )}
@@ -399,39 +308,10 @@ function Vote() {
 
                                 ))}
 
-                                {/* <Link to="/detail">
-                            <div className="bg-white p-4 rounded-md shadow-sm mb-4">
-                                <div className="flex justify-between items-center mb-2">
-                                    <span className="text-sm text-gray-500">id</span>
-                                    <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">Active</span>
-                                </div>
-                                <h3 className="text-lg font-semibold">title</h3>
-
-                                <p
-                                    className="text-gray-600 text-sm mb-2 line-clamp-2">
-
-                                    info</p>
-
-                                <span className="text-sm text-gray-500">Ends in 5 days</span>
-                            </div>
-
-                        </Link> */}
 
 
 
-                                {/* <div className="bg-white p-4 rounded-md shadow-sm">
-                            <div className="flex justify-between items-center mb-2">
-                                <span className="text-sm text-gray-500">@DK (Premia)</span>
-                                <span className="text-sm bg-red-100 text-red-800 px-2 py-1 rounded-full">Closed</span>
-                            </div>
-                            <h3 className="text-lg font-semibold">Election of Procurement Committee Members (ADPC)</h3>
-                            <p
-                                className="text-gray-600 text-sm mb-2 line-clamp-2">This snapshot accompanies the  snapshot accompanies   snapshot accompanies   snapshot accompanies  ongoing vote to establish the Procurement Committee - Go Vote if you haven't already! Proposal Overview: If passed, this...</p>
 
-
-
-                            <span className="text-sm text-gray-500">Ended 15 hours ago</span>
-                        </div> */}
                             </div>
                         </div>
                     </div>
@@ -445,7 +325,7 @@ function Vote() {
 
 
 
-        {/* <Link to="/page2">Go to Page 2</Link> */}
+
     </div>)
 
 }

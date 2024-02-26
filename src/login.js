@@ -1,21 +1,19 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { generateSecretKey, getPublicKey } from 'nostr-tools';
 import { generateMnemonic, mnemonicToSeedSync, validateMnemonic } from 'bip39';
 import { Buffer } from 'buffer';
 
 
-// 配置全局的 Buffer 对象,
+// config globle  buffer
 if (typeof window !== 'undefined') {
   window.Buffer = Buffer;
 }
 
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+
   const [mnemonic, setMnemonic] = useState('');
-  const [isInvalid, setIsInvalid] = useState(false); // 添加状态用于追踪输入的合法性
+  const [isInvalid, setIsInvalid] = useState(false);
 
   const navigate = useNavigate();
 
@@ -24,20 +22,6 @@ const Login = () => {
   };
 
 
-  const handleEmailChange = (e) => {
-    setEmail(e.target.value);
-  };
-
-  const handlePasswordChange = (e) => {
-    setPassword(e.target.value);
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // 在这里处理登录逻辑
-    console.log('Email:', email);
-    console.log('Password:', password);
-  };
 
   async function handleGenerateNew() {
     let sk = generateMnemonic();
@@ -48,8 +32,8 @@ const Login = () => {
       localStorage.setItem('sk', convertedArray)
       console.log('convertedArray:', convertedArray);
     } catch (error) {
-      // 处理错误情况
-      console.error('转换失败:', error);
+      // 
+      console.error('error:', error);
     }
 
 
@@ -57,30 +41,29 @@ const Login = () => {
   }
 
   async function handleLogin() {
-    //     const sk = localStorage.getItem('sk');
-    // console.log('sk', sk);
+
 
     try {
-      console.log('mnemonic',validateMnemonic(mnemonic));
+      console.log('mnemonic', validateMnemonic(mnemonic));
       if (validateMnemonic(String(mnemonic))) {
-        console.log('助记词合法');
+        console.log('mnemonic illegal');
 
-        // 进行其他操作，如转换种子等
+        // 
         const seed = mnemonicToSeedSync(mnemonic);
         const convertedArray = new Uint8Array(seed.slice(0, 32));
         localStorage.setItem('sk', convertedArray);
         console.log('convertedArray:', convertedArray);
 
-        // 导航到目标页面
+
         navigate("/");
       } else {
-        console.log('助记词不合法');
-        // 处理助记词不合法的情况
-       setIsInvalid(true)
+
+
+        setIsInvalid(true)
       }
     } catch (error) {
-      console.error('转换失败:', error);
-      // 处理错误情况
+      console.error('error:', error);
+
     }
   }
 
@@ -188,7 +171,7 @@ const Login = () => {
                 <input
                   type="text"
                   placeholder="mnemonic"
-                  className={`bg-gray-200 rounded-full py-2 px-28 ${isInvalid ? "invalid-input" : ""}`} // 根据状态添加或移除 CSS 类
+                  className={`bg-gray-200 rounded-full py-2 px-28 ${isInvalid ? "invalid-input" : ""}`}
                   value={mnemonic}
                   onChange={handleMnemonicChange}
                 />
