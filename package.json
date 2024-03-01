@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.0",
+    "@mui/material": "^5.15.11",
     "@types/bip39": "^3.0.0",
     "bip39": "^3.1.0",
     "bitcore-mnemonic": "^10.0.23",
@@ -13,6 +16,7 @@
     "react": "^18.0.0",
     "react-copy-to-clipboard": "^5.1.0",
     "react-dom": "^18.0.0",
+    "react-paginate": "^8.2.0",
     "react-router-dom": "^6.2.1",
     "web-vitals": "^2.1.4"
   },

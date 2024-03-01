@@ -1,13 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, {useEffect, useState} from 'react';
+import {Link, useNavigate} from 'react-router-dom';
 
-import { Relay, generateSecretKey, getPublicKey } from 'nostr-tools'
-import { finalizeEvent, verifyEvent } from 'nostr-tools'
-
+import {Relay, generateSecretKey, getPublicKey} from 'nostr-tools'
+import {finalizeEvent, verifyEvent} from 'nostr-tools'
+import Pagination from '@mui/material/Pagination';
 // import Login from './login';
-
+import usePagination from "./Pagination";
 import "./LoadingPage.css";
-
 
 
 function Vote() {
@@ -32,6 +31,18 @@ function Vote() {
         navigate("/login");
     };
 
+    const [minValue, setMinValue] = useState(0);
+    const [maxValue, setMaxValue] = useState(0);
+
+    let [page, setPage] = useState(1);
+    const PER_PAGE = 5;
+
+    const count = Math.ceil(InitSearchData.length / PER_PAGE);
+    const _DATA = usePagination(InitSearchData, PER_PAGE);
+    const handleChange = (e, p) => {
+        setPage(p);
+        _DATA.jump(p);
+    };
 
     useEffect(() => {
 
@@ -45,7 +56,8 @@ function Vote() {
             while (numberArray.length < 32) {
                 numberArray.push(0); // 0
             }
-            let sk = numberArray.map(num => num.toString(16).padStart(2, '0')).join('');;
+            let sk = numberArray.map(num => num.toString(16).padStart(2, '0')).join('');
+            ;
             console.log('sk', sk)
 
             setAddr('0x' + getPublicKey(sk))
@@ -61,14 +73,10 @@ function Vote() {
         };
 
 
-
     }, []);
 
 
-
     async function InitEvent() {
-
-
 
 
         const socket = new WebSocket('wss://zsocialrelay1.nagara.dev');
@@ -77,7 +85,6 @@ function Vote() {
             const message = JSON.stringify(["QUERYPOLLLIST", ""]);
             socket.send(message);
         };
-
 
 
         socket.onmessage = (event) => {
@@ -136,8 +143,9 @@ function Vote() {
             <script src="https://unpkg.com/react-dom/umd/react-dom.development.js"></script>
             <script src="https://unpkg.com/@babel/standalone/babel.js"></script>
             <script src="https://cdn.tailwindcss.com"></script>
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
-            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+            <link rel="stylesheet"
+                  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
             <style>
                 {`
              body {
@@ -190,25 +198,22 @@ function Vote() {
                 <div className="container mx-auto px-4 py-8">
 
 
-
                     <header className="flex justify-between items-center mb-8 p-4 bg-white shadow rounded">
 
-                        <Link to="/">  <a>
-                            <img src="./logo.png" alt="Logo" className="h-8" ></img>
+                        <Link to="/"> <a>
+                            <img src="./logo.png" alt="Logo" className="h-8"></img>
                         </a></Link>
 
                         <div className="flex justify-end">
 
 
-                            <button> <Link to="/newvote"> New vote </Link></button>
-
-
+                            <button><Link to="/newvote"> New vote </Link></button>
 
 
                             <div className="relative inline-block">
                                 <button
                                     className={`bg-gray-500 rounded-full hover:bg-gray-700 text-white font-bold py-2 px-4 ml-8 ${showDropdown ? "dropdown-open" : ""
-                                        }`}
+                                    }`}
                                     onClick={handleButtonClick}
                                 >
                                     {addr.length > 10
@@ -217,12 +222,14 @@ function Vote() {
                                 </button>
 
                                 {showDropdown && (
-                                    <div className="absolute mt-2 w-48 bg-gray-500 rounded-md shadow-lg overflow-hidden">
+                                    <div
+                                        className="absolute mt-2 w-48 bg-gray-500 rounded-md shadow-lg overflow-hidden">
 
                                         <ul className="py-2">
                                             <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer text-white"
                                                 onClick={handleLogoutClick}
-                                            >Logout</li>
+                                            >Logout
+                                            </li>
 
                                         </ul>
                                     </div>
@@ -235,14 +242,13 @@ function Vote() {
                     </header>
 
 
-
                     <div class="mx-auto w-3/5">
 
                         <div className="p-4">
                             <div className="bg-white p-4 rounded-md shadow-sm relative">
                                 <h2 className="text-xl font-semibold mb-4">Search</h2>
                                 <p className="text-gray-600 mb-4">Paste a nostr vote id.</p>
-                                <p className="text-gray-600 mb-4">vote id are supported, write  a filter by vote id.</p>
+                                <p className="text-gray-600 mb-4">vote id are supported, write a filter by vote id.</p>
                                 <div className="flex justify-between items-center mb-4">
                                     <div className="flex items-center flex-grow">
                                         <i className="fas fa-search search-icon"></i>
@@ -261,9 +267,10 @@ function Vote() {
                                         Search
                                     </button>
                                 </div>
-                                <div >
+                                <div>
                                     {searchData.id != 'null' ? (
-                                        <Link to={`/detail/${searchData.id}`} className="bg-white p-4 rounded-md shadow-sm mb-8" >
+                                        <Link to={`/detail/${searchData.id}`}
+                                              className="bg-white p-4 rounded-md shadow-sm mb-8">
                                             <div className="flex justify-between items-center mb-2">
                                                 <span className="text-sm text-gray-500">
                                                     {console.log(searchData)}
@@ -271,14 +278,15 @@ function Vote() {
                                                 </span>
 
 
-                                                <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">Active</span>
+                                                <span
+                                                    className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">Active</span>
                                             </div>
                                             <h3 className="text-lg font-semibold">{searchData.title}</h3>
                                             <p className="text-gray-600 text-sm mb-2 line-clamp-2">{searchData.info}</p>
                                         </Link>
                                     ) : (
 
-                                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                        <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                                             <img
                                                 src="https://lf3-static.bytednsdoc.com/obj/eden-cn/bqaeh7vhobd/feedback.svg"
                                                 alt="Placeholder image representing no data available"
@@ -290,16 +298,17 @@ function Vote() {
                             </div>
 
 
-
                             <div className="mt-8">
                                 <h2 className="text-2xl font-semibold mb-4">Proposals</h2>
 
-                                {InitSearchData.slice().reverse().map((item) => (
+                                {_DATA.currentData().map((item) => (
                                     <Link to={`/detail/${item[0]}`}>
                                         <div className="bg-white p-4 rounded-md shadow-sm mb-4" key={item[0]}>
                                             <div className="flex justify-between items-center mb-2">
-                                                <span className="text-sm text-gray-500">      {item[0].length > 10 ? `${item[0].substring(0, 5)}...${item[0].substring(item[0].length - 5)}` : item[0]}  </span>
-                                                <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">Active</span>
+                                                <span
+                                                    className="text-sm text-gray-500">      {item[0].length > 10 ? `${item[0].substring(0, 5)}...${item[0].substring(item[0].length - 5)}` : item[0]}  </span>
+                                                <span
+                                                    className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">Active</span>
                                             </div>
                                             <h3 className="text-lg font-semibold">{item[1]}</h3>
                                             <p className="text-gray-600 text-sm mb-2 line-clamp-2">{item[2]}</p>
@@ -309,7 +318,15 @@ function Vote() {
                                 ))}
 
 
-
+                                <Pagination
+                                    count={count}
+                                    size="large"
+                                    page={page}
+                                    variant="outlined"
+                                    shape="rounded"
+                                    onChange={handleChange}
+                                >
+                                </Pagination>
 
 
                             </div>
@@ -317,13 +334,10 @@ function Vote() {
                     </div>
 
 
-
                 </div>
             )}
 
         </div>
-
-
 
 
     </div>)
